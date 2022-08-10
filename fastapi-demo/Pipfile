@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [scripts]
-dev = "uvicorn main:app"
+dev = "uvicorn main:app --reload"
 
 [packages]
 anyio = "==3.6.1"
@@ -37,6 +37,10 @@ uvicorn = "==0.17.6"
 uvloop = "==0.16.0"
 watchgod = "==0.8.2"
 websockets = "==10.3"
+gunicorn = "*"
+sqlalchemy = "*"
+alembic = "*"
+databases = {extras = ["postgresql"], version = "*"}
 
 [dev-packages]
 
