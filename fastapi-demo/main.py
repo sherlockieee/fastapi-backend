@@ -25,7 +25,7 @@ notes = sqlalchemy.Table(
 
 
 engine = sqlalchemy.create_engine(DATABASE_URL)
-# metadata.create_all(engine)
+metadata.create_all(engine)
 
 
 class NoteIn(BaseModel):
