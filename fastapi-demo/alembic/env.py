@@ -3,6 +3,9 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config, create_engine
 from sqlalchemy import pool
 import os
+from dotenv import load_dotenv
+load_dotenv()
+
 from alembic import context
 
 # this is the Alembic Config object, which provides
