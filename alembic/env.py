@@ -4,6 +4,7 @@ from sqlalchemy import engine_from_config, create_engine
 from sqlalchemy import pool
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
 
 from alembic import context
@@ -29,7 +30,10 @@ target_metadata = None
 
 
 def get_url():
-    return os.getenv("DATABASE_URL")
+    url = os.getenv("DATABASE_URL")
+    if url.startswith("postgres://"):
+        url = url.replace("postgres://", "postgresql://", 1)
+    return url
 
 
 def run_migrations_offline():
