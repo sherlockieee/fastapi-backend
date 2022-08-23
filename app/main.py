@@ -4,7 +4,7 @@ from app.db import engine, SessionLocal
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-models.Base.metadata.create_all(bind=engine)
+# models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 

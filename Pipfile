@@ -43,6 +43,7 @@ alembic = "*"
 databases = {extras = ["postgresql"], version = "*"}
 psycopg-binary = "*"
 psycopg2-binary = "*"
+uuid = "*"
 
 [dev-packages]
 
