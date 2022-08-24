@@ -18,22 +18,22 @@ class ProjectIn(BaseModel):
     total_backers: int = 0
     description: Optional[str] = None
     end_date: datetime
-    tags: "List[TagBase]"
+    tags: "List[Tag]"
 
 
-class ProjectBase(ProjectIn):
+class Project(ProjectIn):
     id: int
-    uuid: UUID
+    # uuid: UUID
     created: datetime
 
     class Config:
         orm_mode = True
 
 
-class ProjectOut(ProjectBase):
+class ProjectOut(Project):
     pass
 
 
-from app.schemas.tag import TagBase
+from app.schemas.tag import Tag
 
-ProjectBase.update_forward_refs()
+Project.update_forward_refs()
