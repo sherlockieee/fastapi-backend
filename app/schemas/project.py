@@ -1,13 +1,9 @@
 from datetime import datetime
-from enum import Enum
 from pydantic import BaseModel
 from typing import List, Optional
 from uuid import UUID
 
-
-class Currency(Enum):
-    USD = "USD"
-    EUR = "EUR"
+from app.schemas.currency import Currency
 
 
 class ProjectIn(BaseModel):
