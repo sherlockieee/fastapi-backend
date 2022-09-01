@@ -1,9 +1,19 @@
 from uuid import uuid4
-from sqlalchemy import Column, Integer, String, DateTime, Float, Text, ForeignKey
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    DateTime,
+    Float,
+    Text,
+    ForeignKey,
+    Enum,
+)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-
+from datetime import datetime
 from app.db import Base
+from app.schemas.project import Currency
 
 
 class ProjectTag(Base):
@@ -24,11 +34,11 @@ class Project(Base):
     uuid = Column(UUID(as_uuid=True), default=uuid4, index=True, nullable=False)
     title = Column(String, nullable=False, index=True)
     funding_needed = Column(Float, nullable=False)
-    currency = Column(String)
+    currency = Column(Enum(Currency))
     total_raised = Column(Float)
     total_backers = Column(Integer)
     description = Column(Text)
-    created = Column(DateTime)
+    created = Column(DateTime(timezone=True), default=datetime.utcnow)
     end_date = Column(DateTime)
     tags = relationship("ProjectTag", back_populates="project")
 

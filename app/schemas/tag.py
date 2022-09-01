@@ -10,14 +10,20 @@ class TagBase(BaseModel):
         orm_mode = True
 
 
-class Tag(TagBase):
+class TagIn(TagBase):
     pass
 
 
-class TagSchema(TagBase):
-    projects: "List[Project]"
+class Tag(TagBase):
+    projects: List["Project"]
+    pass
+
+
+class TagOut(Tag):
+    pass
 
 
 from app.schemas.project import Project
 
 Tag.update_forward_refs()
+TagOut.update_forward_refs()

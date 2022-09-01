@@ -18,15 +18,16 @@ class ProjectIn(BaseModel):
     total_backers: int = 0
     description: Optional[str] = None
     end_date: datetime
-    tags: "List[Tag]"
+    tags: List["Tag"]
 
 
 class Project(ProjectIn):
     id: int
-    # uuid: UUID
+    uuid: UUID
     created: datetime
 
     class Config:
+        use_enum_values = True
         orm_mode = True
 
 
@@ -36,4 +37,6 @@ class ProjectOut(Project):
 
 from app.schemas.tag import Tag
 
+ProjectIn.update_forward_refs()
 Project.update_forward_refs()
+ProjectOut.update_forward_refs()
