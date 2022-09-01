@@ -3,7 +3,6 @@ from typing import List
 
 
 class TagBase(BaseModel):
-    id: int
     name: str
 
     class Config:
@@ -15,6 +14,7 @@ class TagIn(TagBase):
 
 
 class Tag(TagBase):
+    id: int
     projects: List["Project"]
     pass
 
