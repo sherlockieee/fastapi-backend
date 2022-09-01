@@ -5,18 +5,21 @@ from typing import List
 class TagBase(BaseModel):
     name: str
 
-    class Config:
-        orm_mode = True
-
 
 class TagIn(TagBase):
     pass
 
 
+class TagInProject(TagBase):
+    id: int
+
+
 class Tag(TagBase):
     id: int
     projects: List["Project"]
-    pass
+
+    class Config:
+        orm_mode = True
 
 
 class TagOut(Tag):
