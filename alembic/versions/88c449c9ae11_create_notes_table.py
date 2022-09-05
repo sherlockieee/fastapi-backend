@@ -17,13 +17,15 @@ depends_on = None
 
 
 def upgrade():
-    op.create_table(
-        "notes",
-        sa.Column("id", sa.Integer, primary_key=True),
-        sa.Column("text", sa.String),
-        sa.Column("completed", sa.Boolean),
-    )
+    # op.create_table(
+    #     "notes",
+    #     sa.Column("id", sa.Integer, primary_key=True),
+    #     sa.Column("text", sa.String),
+    #     sa.Column("completed", sa.Boolean),
+    # )
+    pass
 
 
 def downgrade():
-    op.drop_table("notes")
+    # op.drop_table("notes")
+    pass
