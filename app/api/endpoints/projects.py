@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 
 import app.models as models
@@ -10,9 +10,21 @@ router = APIRouter()
 
 
 @router.get("/", response_model=List[schema.ProjectOut])
-def read_notes(database: Session = Depends(get_db)):
-    all_projects = database.query(models.Project).all()
+def get_projects(
+    database: Session = Depends(get_db), offset: int = 0, limit: int = 100
+):
+    all_projects = database.query(models.Project).offset(offset).limit(limit).all()
     return all_projects
+
+
+@router.get("/{project_id}", response_model=schema.ProjectOut)
+def get_one_project(project_id: int, database: Session = Depends(get_db)):
+    project = (
+        database.query(models.Project).filter(models.Project.id == project_id).first()
+    )
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    return project
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schema.ProjectOut)
