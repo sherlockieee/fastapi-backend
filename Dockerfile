@@ -9,4 +9,4 @@ RUN pipenv install --system --deploy
 
 COPY . .
 
-CMD [ "uvicorn", "main:app", "--reload", "--host", "0.0.0.0" ]
+CMD [ "uvicorn", "app.main:app", "--reload", "--host", "0.0.0.0" ]
