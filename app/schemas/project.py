@@ -6,7 +6,7 @@ from uuid import UUID
 from app.schemas.currency import Currency
 
 
-class ProjectIn(BaseModel):
+class ProjectBase(BaseModel):
     title: str
     funding_needed: float
     currency: Currency
@@ -14,7 +14,15 @@ class ProjectIn(BaseModel):
     total_backers: int = 0
     description: Optional[str] = None
     end_date: datetime
-    tags: List["Tag"]
+
+
+class ProjectInTag(ProjectBase):
+    class Config:
+        orm_mode = True
+
+
+class ProjectIn(ProjectBase):
+    tags: List["TagInProject"]
 
 
 class Project(ProjectIn):
@@ -31,7 +39,7 @@ class ProjectOut(Project):
     pass
 
 
-from app.schemas.tag import Tag
+from app.schemas.tag import TagInProject
 
 ProjectIn.update_forward_refs()
 Project.update_forward_refs()

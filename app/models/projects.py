@@ -30,4 +30,7 @@ class Project(Base):
     description = Column(Text)
     created = Column(DateTime(timezone=True), default=datetime.utcnow)
     end_date = Column(DateTime)
-    tags = relationship("ProjectTag", back_populates="project")
+    tags = relationship("Tag", secondary="project_tags", back_populates="projects")
+
+    def __repr__(self):
+        return f"{self.title}: {self.tags}"
