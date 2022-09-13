@@ -5,6 +5,7 @@ name = "pypi"
 
 [scripts]
 dev = "uvicorn app.main:app --reload"
+test = "pytest"
 
 [packages]
 anyio = "==3.6.1"
@@ -44,6 +45,7 @@ databases = {extras = ["postgresql"], version = "*"}
 psycopg-binary = "*"
 psycopg2-binary = "*"
 uuid = "*"
+pytest = "*"
 
 [dev-packages]
 

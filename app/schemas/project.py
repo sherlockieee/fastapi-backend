@@ -22,7 +22,7 @@ class ProjectInTag(ProjectBase):
 
 
 class ProjectIn(ProjectBase):
-    tags: List["TagInProject"]
+    tags: Optional[List["TagInProject"]]
 
 
 class Project(ProjectIn):
