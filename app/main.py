@@ -10,6 +10,7 @@ app = FastAPI()
 
 origins = [
     "https://capstone-exploration.vercel.app",
+    "https://x-kickstarter-for-climate.vercel.app/",
     "http://localhost",
     "http://localhost:3000",
     "http://localhost:8080",
