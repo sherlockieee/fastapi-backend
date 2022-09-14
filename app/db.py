@@ -16,7 +16,6 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from app.db import Base
 from app.schemas.currency import Currency
 
 
@@ -37,6 +36,7 @@ Base = declarative_base()
 
 class Project(Base):
     __tablename__ = "projects"
+    __table_args__ = {"extend_existing": True}
 
     id = Column(
         Integer, primary_key=True, index=True, autoincrement=True, nullable=False
