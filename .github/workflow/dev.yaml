@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: ["main, dev"]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - run: |
+          git fetch --prune --unshallow
+      - run: cp .env.sample .env
+
+      - name: Set up Python 3.10.4
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9.9
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+      - name: Lint with black
+        run: |
+          black src
+          black --check src
+      - name: Test with pytest
+        run: pytest
