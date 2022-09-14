@@ -29,4 +29,4 @@ jobs:
           pipenv run lint
           pipenv run lintcheck
       - name: Test with pytest
-        run: pipenv run dev
+        run: pipenv run test

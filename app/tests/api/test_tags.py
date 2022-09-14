@@ -1,6 +1,5 @@
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
-from dateutil.parser import parse
 
 
 def test_read_tags(client: TestClient, db: Session) -> None:
