@@ -46,6 +46,7 @@ psycopg-binary = "*"
 psycopg2-binary = "*"
 uuid = "*"
 pytest = "*"
+black = "*"
 
 [dev-packages]
 
