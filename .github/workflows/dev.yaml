@@ -46,8 +46,8 @@ jobs:
         run: |
           pipenv run lint
           pipenv run lintcheck
-      - name: Test with pytest
-        run: pipenv run test
-        env:
-          DATABASE_URL: postgres://postgres:postgres@localhost/postgres
+      # - name: Test with pytest
+      #   run: pipenv run test
+      #   env:
+      #     DATABASE_URL: postgres://postgres:postgres@localhost/postgres
 
