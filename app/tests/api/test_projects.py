@@ -59,9 +59,9 @@ def test_add_tag_to_project(client: TestClient, db: Session):
     tag_content = tag_response.json()
     assert "id" in tag_content
     tag_id = tag_content["id"]
-    print(project_id, tag_id)
+    print(project_content, tag_content)
 
-    response = client.post(f"/projects/{project_id}/tags/{tag_id}/")
+    response = client.post(f"/projects/{project_id}/tags/{tag_id}")
     assert response.status_code == 201
     content = response.json()
     assert len(content["tags"]) == 1
