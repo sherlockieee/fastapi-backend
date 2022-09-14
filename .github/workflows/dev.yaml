@@ -26,7 +26,7 @@ jobs:
           pipenv install --dev
       - name: Lint with black
         run: |
-          black app
-          black --check app
+          pipenv run lint
+          pipenv run lintcheck
       - name: Test with pytest
-        run: pytest
+        run: pipenv run dev

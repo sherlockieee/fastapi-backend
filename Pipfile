@@ -6,6 +6,8 @@ name = "pypi"
 [scripts]
 dev = "uvicorn app.main:app --reload"
 test = "pytest"
+lint = "black app"
+lintcheck = "black --check app"
 
 [packages]
 anyio = "==3.6.1"
@@ -45,10 +47,11 @@ databases = {extras = ["postgresql"], version = "*"}
 psycopg-binary = "*"
 psycopg2-binary = "*"
 uuid = "*"
-pytest = "*"
-black = "*"
+
 
 [dev-packages]
+pytest = "*"
+black = "*"
 
 [requires]
 python_version = "3.9"
