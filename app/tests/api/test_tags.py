@@ -7,7 +7,7 @@ def test_read_tags(client: TestClient, db: Session) -> None:
     assert response.status_code == 200
 
 
-def test_create_project(client: TestClient, db: Session) -> None:
+def test_create_tag(client: TestClient, db: Session) -> None:
     data = {
         "name": "Carbon removal",
     }

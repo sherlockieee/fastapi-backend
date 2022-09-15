@@ -24,7 +24,7 @@ def test_create_project(client: TestClient, db: Session) -> None:
     assert response.status_code == 201
     content = response.json()
     assert content["title"] == data["title"]
-    assert parse(content["end_date"]) == parse(data["end_date"])
+    assert parse(content["end_date"]).date() == parse(data["end_date"]).date()
     assert content["funding_needed"] == data["funding_needed"]
     assert content["currency"] == data["currency"]
     assert content["total_raised"] == data["total_raised"]

@@ -1,6 +1,5 @@
 from typing import List
-from fastapi import APIRouter, Depends, status, HTTPException
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, status, HTTPException
 
 import app.schemas.tag as schema
 from app.prisma.prisma import db

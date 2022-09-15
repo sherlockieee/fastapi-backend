@@ -1,13 +1,9 @@
 from typing import List
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, status, HTTPException
 
 
-# import app.models as models
 from app.prisma.prisma import db
 import app.schemas.project as schema
-from app.schemas.currency import Currency
-
-# from app.models import project_tags
 
 
 router = APIRouter(prefix="/projects", tags=["projects"])
