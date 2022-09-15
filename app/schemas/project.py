@@ -1,6 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Union
 from uuid import UUID
 
 from app.schemas.currency import Currency
@@ -26,13 +26,14 @@ class ProjectInTag(ProjectBase):
 
 
 class ProjectIn(ProjectBase):
-    tags: Optional[List["TagInProject"]]
+    tags: Union[List["TagBase"], List["TagInProject"]]
 
 
 class Project(ProjectIn):
     id: int
     uuid: UUID
     created: datetime
+    tags: List["TagInProject"]
 
     class Config:
         use_enum_values = True
@@ -43,7 +44,7 @@ class ProjectOut(Project):
     pass
 
 
-from app.schemas.tag import TagInProject
+from app.schemas.tag import TagBase, TagInProject
 
 ProjectIn.update_forward_refs()
 Project.update_forward_refs()

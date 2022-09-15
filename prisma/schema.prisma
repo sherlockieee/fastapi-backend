@@ -1,0 +1,36 @@
+// database
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// generator
+generator client {
+  provider  = "prisma-client-py"
+  interface = "asyncio"
+}
+
+enum Currency {
+  USD
+  EUR
+}
+
+model Tag {
+  id       Int       @id @default(autoincrement())
+  name     String
+  projects Project[]
+}
+
+model Project {
+  id             Int      @id @default(autoincrement())
+  uuid           String   @default(uuid())
+  title          String
+  funding_needed Float
+  currency       Currency
+  total_raised   Float    @default(0)
+  total_backers  Int      @default(0)
+  description    String
+  created        DateTime @default(now())
+  end_date       DateTime
+  tags           Tag[]
+}

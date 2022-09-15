@@ -47,7 +47,7 @@ databases = {extras = ["postgresql"], version = "*"}
 psycopg-binary = "*"
 psycopg2-binary = "*"
 uuid = "*"
-
+prisma = "*"
 
 [dev-packages]
 pytest = "*"

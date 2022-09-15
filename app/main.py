@@ -1,11 +1,9 @@
-from app import db
-from app.config import settings
-from app.db import engine, SessionLocal
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-db.Base.metadata.create_all(bind=engine)
+from app.config import settings
+from app.prisma.prisma import db
+
 
 app_configs = {}
 if settings.ENVIRONMENT not in settings.SHOW_DOCS_ENVIRONMENT:
@@ -16,7 +14,6 @@ app = FastAPI(**app_configs)
 origins = [
     "https://capstone-exploration.vercel.app",
     "https://x-kickstarter-for-climate.vercel.app/",
-    "http://localhost",
     "http://localhost:3000",
 ]
 
@@ -29,14 +26,14 @@ app.add_middleware(
 )
 
 
-def get_db():
-    try:
-        db = SessionLocal()
-        yield db
-    except Exception as e:
-        raise e
-    finally:
-        db.close()
+@app.on_event("startup")
+async def startup():
+    await db.connect()
+
+
+@app.on_event("shutdown")
+async def shutdown():
+    await db.disconnect()
 
 
 from app.api.api import router
