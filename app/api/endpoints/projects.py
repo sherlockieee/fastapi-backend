@@ -10,7 +10,7 @@ import app.schemas.project as schema
 from app.models import project_tags
 
 
-router = APIRouter()
+router = APIRouter(prefix="/projects", tags=["projects"])
 
 
 @router.get("/", response_model=List[schema.ProjectOut])

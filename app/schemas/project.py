@@ -17,6 +17,10 @@ class ProjectBase(BaseModel):
 
 
 class ProjectInTag(ProjectBase):
+    id: int
+    uuid: UUID
+    created: datetime
+
     class Config:
         orm_mode = True
 
