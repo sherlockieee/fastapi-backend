@@ -53,22 +53,31 @@ async def add_tag_to_project(
     project_id: int,
     tag_id: int,
 ):
-    project = await db.project.find_unique(where={"id": project_id})
+    project = await db.project.find_unique(
+        where={"id": project_id}, include={"tags": True}
+    )
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
 
-    tag = await db.tag.find_unique(
-        where={"id": tag_id}, include={"name": True, "id": True}
-    )
+    tag = await db.tag.find_unique(where={"id": tag_id})
     if not tag:
         raise HTTPException(status_code=404, detail="Tag not found")
-    print(tag)
+
+    if tag in project.tags:
+        raise HTTPException(status_code=403, detail="Tag already in Project")
+
+    tag_id_list = list(map(lambda x: {"id": x.id}, project.tags))
+    tag_id_list.append({"id": tag.id})
     await db.project.update(
-        where={"id": project_id},
-        data={**project.dict(), "tags": {"create": {**tag.dict()}}},
+        where={"id": project_id}, data={**project.dict(), "tags": {"set": tag_id_list}}
     )
 
     # refresh
-    project = await db.project.find_unique(where={"id": project_id})
+    project = await db.project.find_unique(
+        where={
+            "id": project_id,
+        },
+        include={"tags": True},
+    )
 
     return project
