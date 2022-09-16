@@ -81,3 +81,42 @@ async def add_tag_to_project(
     )
 
     return project
+
+
+@router.delete(
+    "/{project_id}/tags/{tag_id}",
+    response_model=schema.ProjectOut,
+)
+async def delete_tag_from_project(
+    project_id: int,
+    tag_id: int,
+):
+    project = await db.project.find_unique(
+        where={"id": project_id}, include={"tags": True}
+    )
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+
+    tag = await db.tag.find_unique(where={"id": tag_id})
+    if not tag:
+        raise HTTPException(status_code=404, detail="Tag not found")
+
+    if tag not in project.tags:
+        raise HTTPException(status_code=403, detail="Tag not in Project")
+
+    tag_id_list = list(map(lambda x: {"id": x.id}, project.tags))
+    new_tag_ids = list(filter(lambda x: x["id"] != tag.id, tag_id_list))
+
+    await db.project.update(
+        where={"id": project_id}, data={**project.dict(), "tags": {"set": new_tag_ids}}
+    )
+
+    # refresh
+    project = await db.project.find_unique(
+        where={
+            "id": project_id,
+        },
+        include={"tags": True},
+    )
+
+    return project
