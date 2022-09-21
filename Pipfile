@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [scripts]
-dev = "uvicorn app.main:app --reload"
+dev = "bash -c 'prisma generate && uvicorn app.main:app --reload'"
 test = "pytest app/tests"
 lint = "black app"
 lintcheck = "black --check app"
