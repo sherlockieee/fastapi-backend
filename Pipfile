@@ -9,6 +9,7 @@ dev = "uvicorn app.main:app --reload"
 test = "pytest app/tests"
 lint = "black app"
 lintcheck = "black --check app"
+updatereq="pipenv run pip freeze > requirements.txt"
 
 [packages]
 anyio = "==3.6.1"
