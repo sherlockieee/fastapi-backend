@@ -22,6 +22,7 @@ class Project(Base):
         Integer, primary_key=True, index=True, autoincrement=True, nullable=False
     )
     uuid = Column(UUID(as_uuid=True), default=uuid4, index=True, nullable=False)
+    new_col = Column(Integer)
     title = Column(String, nullable=False, index=True)
     funding_needed = Column(Float, nullable=False)
     currency = Column(Enum(Currency))

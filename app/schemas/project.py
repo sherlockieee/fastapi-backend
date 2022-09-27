@@ -14,6 +14,7 @@ class ProjectBase(BaseModel):
     total_backers: int = 0
     description: Optional[str] = None
     end_date: datetime
+    new_col: Optional[int] = 0
 
 
 class ProjectInTag(ProjectBase):
