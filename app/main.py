@@ -30,7 +30,6 @@ app.add_middleware(
 
 @app.on_event("startup")
 def on_startup():
-    db.Base.metadata.drop_all(bind=engine)
     db.Base.metadata.create_all(bind=engine)
 
 
