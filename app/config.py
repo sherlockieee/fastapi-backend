@@ -2,7 +2,6 @@ from typing import Optional
 from pydantic import BaseSettings
 import os
 from dotenv import load_dotenv
-from starlette.config import Config
 
 
 class Settings(BaseSettings):

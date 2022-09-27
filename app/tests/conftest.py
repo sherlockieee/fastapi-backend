@@ -4,6 +4,7 @@ from typing import Generator
 
 
 from app.main import app
+
 from app.prisma.prisma import db
 
 
