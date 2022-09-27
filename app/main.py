@@ -1,6 +1,5 @@
-from app import db
 from app.config import settings
-from app.db import engine, SessionLocal
+from app.db.session import SessionLocal
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -26,11 +25,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-@app.on_event("startup")
-def on_startup():
-    db.Base.metadata.create_all(bind=engine)
 
 
 def get_db():
