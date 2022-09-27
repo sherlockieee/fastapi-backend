@@ -5,9 +5,6 @@ from dotenv import load_dotenv
 from starlette.config import Config
 
 
-# explicit list of allowed envs
-
-
 class Settings(BaseSettings):
     load_dotenv()
 
