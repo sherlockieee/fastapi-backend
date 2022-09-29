@@ -1,6 +1,5 @@
 from sqlalchemy import Column, ForeignKey, Table
-from sqlalchemy.orm import relationship
-from app.db import Base
+from app.db.base_class import Base
 
 
 project_tags = Table(

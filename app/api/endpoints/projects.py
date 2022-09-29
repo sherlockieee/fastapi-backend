@@ -53,7 +53,34 @@ def add_tag_to_project(project_id: int, tag_id: int, db: Session = Depends(get_d
     tag = db.query(models.Tag).filter(models.Tag.id == tag_id).first()
     if not tag:
         raise HTTPException(status_code=404, detail="Tag not found")
+    if tag in project.tags:
+        raise HTTPException(status_code=403, detail="Tag already in project")
+
     db.execute(insert(project_tags).values(project_id=project_id, tag_id=tag_id))
+    db.commit()
+    db.refresh(project)
+    return project
+
+
+@router.delete(
+    "/{project_id}/tags/{tag_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=schema.ProjectOut,
+)
+def delete_tag_from_project(
+    project_id: int, tag_id: int, db: Session = Depends(get_db)
+):
+    project = db.query(models.Project).filter(models.Project.id == project_id).first()
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+
+    tag = db.query(models.Tag).filter(models.Tag.id == tag_id).first()
+    if not tag:
+        raise HTTPException(status_code=404, detail="Tag not found")
+    if tag not in project.tags:
+        raise HTTPException(status_code=403, detail="Tag is not in project")
+
+    project.tags.remove(tag)
     db.commit()
     db.refresh(project)
     return project

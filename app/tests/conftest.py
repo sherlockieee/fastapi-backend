@@ -4,7 +4,7 @@ from typing import Generator
 
 
 from app.main import app
-from app.db import SessionLocal
+from app.db.session import SessionLocal
 
 
 @pytest.fixture(scope="session")

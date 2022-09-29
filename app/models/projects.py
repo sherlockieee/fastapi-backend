@@ -11,7 +11,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from app.db import Base
+from app.db.base_class import Base
 from app.schemas.currency import Currency
 
 
