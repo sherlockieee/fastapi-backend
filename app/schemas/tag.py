@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 
 
 class TagBase(BaseModel):
@@ -8,6 +8,13 @@ class TagBase(BaseModel):
 
 class TagIn(TagBase):
     pass
+
+
+class TagInProjectIn(TagBase):
+    id: Optional[int]
+
+    class Config:
+        orm_mode = True
 
 
 class TagInProject(TagBase):

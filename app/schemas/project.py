@@ -26,13 +26,14 @@ class ProjectInTag(ProjectBase):
 
 
 class ProjectIn(ProjectBase):
-    tags: Optional[List["TagInProject"]]
+    tags: List["TagInProjectIn"]
 
 
-class Project(ProjectIn):
+class Project(ProjectBase):
     id: int
     uuid: UUID
     created: datetime
+    tags: List["TagInProject"]
 
     class Config:
         use_enum_values = True
@@ -43,7 +44,7 @@ class ProjectOut(Project):
     pass
 
 
-from app.schemas.tag import TagInProject
+from app.schemas.tag import TagInProject, TagInProjectIn
 
 ProjectIn.update_forward_refs()
 Project.update_forward_refs()

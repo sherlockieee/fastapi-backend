@@ -14,29 +14,41 @@ router = APIRouter(prefix="/projects", tags=["projects"])
 
 
 @router.get("/", response_model=List[schema.ProjectOut])
-def get_projects(
-    database: Session = Depends(get_db), offset: int = 0, limit: int = 100
-):
-    all_projects = database.query(models.Project).offset(offset).limit(limit).all()
+def get_projects(db: Session = Depends(get_db), offset: int = 0, limit: int = 100):
+    all_projects = db.query(models.Project).offset(offset).limit(limit).all()
     return all_projects
 
 
 @router.get("/{project_id}", response_model=schema.ProjectOut)
-def get_one_project(project_id: int, database: Session = Depends(get_db)):
-    project = (
-        database.query(models.Project).filter(models.Project.id == project_id).first()
-    )
+def get_one_project(project_id: int, db: Session = Depends(get_db)):
+    project = db.query(models.Project).filter(models.Project.id == project_id).first()
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
     return project
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schema.ProjectOut)
-def create_project(project: schema.ProjectIn, database: Session = Depends(get_db)):
-    new_project = models.Project(**project.dict())
-    database.add(new_project)
-    database.commit()
-    database.refresh(new_project)
+def create_project(project: schema.ProjectIn, db: Session = Depends(get_db)):
+    project_dict = project.dict()
+    project_tags = project_dict["tags"]
+    project_dict["tags"] = []
+
+    new_project = models.Project(**project_dict)
+    db.add(new_project)
+    db.commit()
+    db.refresh(new_project)
+
+    for tag in project_tags:
+        existing = db.query(models.Tag).filter(models.Tag.id == tag["id"]).first()
+        if existing:
+            new_project.tags.append(existing)
+        if not existing:
+            new_tag = models.Tag(name=tag["name"])
+            new_project.tags.append(new_tag)
+            db.add(new_tag)
+
+    db.commit()
+    db.refresh(new_project)
     return new_project
 
 
