@@ -48,6 +48,7 @@ psycopg-binary = "*"
 psycopg2-binary = "*"
 uuid = "*"
 python-dateutil = "*"
+jose = "*"
 
 [dev-packages]
 pytest = "*"
