@@ -49,6 +49,8 @@ psycopg2-binary = "*"
 uuid = "*"
 python-dateutil = "*"
 jose = "*"
+python-jose = "*"
+bcrypt = "*"
 
 [dev-packages]
 pytest = "*"

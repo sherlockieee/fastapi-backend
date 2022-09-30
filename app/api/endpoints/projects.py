@@ -5,7 +5,7 @@ from sqlalchemy import insert
 
 
 import app.models as models
-from app.main import get_db
+from app.api.deps import get_db
 import app.schemas.project as schema
 from app.models import project_tags
 

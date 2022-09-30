@@ -1,13 +1,24 @@
 from fastapi import status, HTTPException, APIRouter, Depends
+from fastapi.security import OAuth2PasswordRequestForm
+from datetime import timedelta
 from sqlalchemy.orm import Session
 from typing import List
 
-from app.schemas.user import UserCreate, UserOut
-from app.utils.password import get_hashed_password
-from app.main import get_db
+from app.schemas.token import Token
+from app.schemas.user import UserCreate, UserInDB, UserOut
+from app.utils.password import get_hashed_password, verify_password
+from app.utils.token import create_access_token, create_refresh_token
+from app.api.deps import get_db, get_current_user
 import app.models as models
+from app.config import settings
 
 router = APIRouter(prefix="/users", tags=["users"])
+
+
+@router.get("/", response_model=List[UserOut])
+def get_users(db: Session = Depends(get_db), offset: int = 0, limit: int = 100):
+    all_users = db.query(models.User).offset(offset).limit(limit).all()
+    return all_users
 
 
 @router.post("/signup", response_model=UserOut)
@@ -36,7 +47,33 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     return user
 
 
-@router.get("/", response_model=List[UserOut])
-def get_users(db: Session = Depends(get_db), offset: int = 0, limit: int = 100):
-    all_users = db.query(models.User).offset(offset).limit(limit).all()
-    return all_users
+@router.post("/login", response_model=Token)
+def sign_in(
+    form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
+):
+    user: UserInDB = (
+        db.query(models.User).filter(models.User.email == form_data.username).first()
+    )
+    print(user)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="User email doesn't exist"
+        )
+    if not verify_password(form_data.password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="User password is incorrect"
+        )
+    if not user.is_active:
+        raise HTTPException(status_code=400, detail="Inactive user")
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    return {
+        "access_token": create_access_token(
+            user.id, expires_delta=access_token_expires
+        ),
+        "token_type": "bearer",
+    }
+
+
+@router.get("/me", response_model=UserOut)
+def get_current_user(user: models.User = Depends(get_current_user)):
+    return user
