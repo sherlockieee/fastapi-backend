@@ -14,7 +14,11 @@ router = APIRouter(prefix="/projects", tags=["projects"])
 
 
 @router.get("/", response_model=List[schema.ProjectOut])
-def get_projects(db: Session = Depends(get_db), offset: int = 0, limit: int = 100):
+def get_projects(
+    db: Session = Depends(get_db),
+    offset: int = 0,
+    limit: int = 100,
+):
     all_projects = db.query(models.Project).offset(offset).limit(limit).all()
     return all_projects
 
