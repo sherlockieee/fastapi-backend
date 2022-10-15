@@ -30,7 +30,14 @@ class Project(Base):
     description = Column(Text)
     created = Column(DateTime(timezone=True), default=datetime.utcnow)
     end_date = Column(DateTime)
-    tags = relationship("Tag", secondary="project_tags", back_populates="projects")
+    total_credits = Column(Integer)
+    cost_per_credit = Column(Float)
+    needed_credits = Column(Integer)
+    tags = relationship("Tag", secondary="tags_projects", back_populates="projects")
+    owner = relationship("User", back_populates="projects_owned")
+    backers = relationship(
+        "User", secondary="backers_projects", back_populates="project"
+    )
 
     def __repr__(self):
         return f"{self.title}: {self.tags}"

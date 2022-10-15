@@ -2,6 +2,7 @@ from datetime import datetime
 from pydantic import BaseModel
 from typing import List, Optional
 from uuid import UUID
+from app.schemas.user import UserOut
 
 from app.schemas.currency import Currency
 
@@ -14,6 +15,11 @@ class ProjectBase(BaseModel):
     total_backers: int = 0
     description: Optional[str] = None
     end_date: datetime
+    total_credits: int
+    cost_per_credit: float
+    needed_credits: int
+    owner: UserOut
+    backers: Optional[List[UserOut]] = []
 
 
 class ProjectInTag(ProjectBase):
