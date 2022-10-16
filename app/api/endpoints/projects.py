@@ -1,11 +1,12 @@
 from typing import List
 from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 from sqlalchemy import insert
 
 
 import app.models as models
-from app.api.deps import get_db
+from app.api.deps import get_current_active_user, get_db
 import app.schemas.project as schema
 from app.models import project_tags
 
@@ -32,28 +33,34 @@ def get_one_project(project_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schema.ProjectOut)
-def create_project(project: schema.ProjectIn, db: Session = Depends(get_db)):
-    project_dict = project.dict()
-    project_tags = project_dict["tags"]
-    project_dict["tags"] = []
-
-    new_project = models.Project(**project_dict)
+def create_project(
+    project: schema.ProjectIn,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_active_user),
+):
+    project_dict = jsonable_encoder(project)
+    # project_tags = project_dict["tags"]
+    # project_dict["tags"] = []
+    print(project_dict)
+    new_project = models.Project(**project_dict, owner_id=current_user.id)
     db.add(new_project)
     db.commit()
     db.refresh(new_project)
 
-    for tag in project_tags:
-        existing = db.query(models.Tag).filter(models.Tag.id == tag["id"]).first()
-        if existing:
-            new_project.tags.append(existing)
-        if not existing:
-            new_tag = models.Tag(name=tag["name"])
-            new_project.tags.append(new_tag)
-            db.add(new_tag)
+    # for tag in project_tags:
+    #     existing = db.query(models.Tag).filter(models.Tag.id == tag["id"]).first()
+    #     if existing:
+    #         new_project.tags.append(existing)
+    #     if not existing:
+    #         new_tag = models.Tag(name=tag["name"])
+    #         new_project.tags.append(new_tag)
+    #         db.add(new_tag)
 
-    db.commit()
-    db.refresh(new_project)
-    return new_project
+    # db.commit()
+    # db.refresh(new_project)
+
+    print(jsonable_encoder(new_project))
+    return jsonable_encoder(new_project)
 
 
 @router.post(

@@ -20,15 +20,14 @@ class ProjectBase(BaseModel):
 
 
 class ProjectIn(ProjectBase):
-    tags: List["TagInProjectIn"]
-    owner: Optional["UserInProject"]
+    tags: Optional[List["TagInProjectIn"]] = []
 
 
 class ProjectInTag(ProjectBase):
     id: int
     uuid: UUID
     created: datetime
-    owner: Optional["UserInProject"]
+    owner: Optional["UserInProject"] = None
 
     class Config:
         orm_mode = True
@@ -40,11 +39,15 @@ class ProjectInUser(ProjectBase):
     created: datetime
     tags: List["TagInProject"]
 
+    class Config:
+        orm_mode = True
+
 
 class Project(ProjectIn):
     id: int
     uuid: UUID
     created: datetime
+    owner: Optional["UserInProject"] = None
 
     class Config:
         use_enum_values = True
@@ -59,6 +62,7 @@ from app.schemas.tag import TagInProject, TagInProjectIn
 from app.schemas.user import UserInProject
 
 ProjectInTag.update_forward_refs()
+ProjectInUser.update_forward_refs()
 ProjectIn.update_forward_refs()
 Project.update_forward_refs()
 ProjectOut.update_forward_refs()

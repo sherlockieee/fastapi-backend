@@ -9,8 +9,6 @@ class UserBase(BaseModel):
     is_admin: Optional[bool] = False
     full_name: str
     preferred_name: Optional[str] = None
-    is_project_owner: Optional[bool] = False
-    is_backer: Optional[bool] = False
 
 
 class UserCreate(UserBase):
@@ -22,12 +20,15 @@ class UserUpdate(UserBase):
 
 
 class UserInProject(UserBase):
-    pass
+    id: int
+
+    class Config:
+        orm_mode = True
 
 
 class UserInDBBase(UserBase):
-    id: Optional[int] = None
-    projects_owned: Optional[List["ProjectInUser"]] = []
+    id: int
+    projects_owned: Optional[List["ProjectInUser"]]
 
     class Config:
         orm_mode = True
