@@ -1,13 +1,5 @@
 from uuid import uuid4
-from sqlalchemy import (
-    Column,
-    Integer,
-    String,
-    DateTime,
-    Float,
-    Text,
-    Enum,
-)
+from sqlalchemy import Column, Integer, String, DateTime, Float, Text, Enum, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from datetime import datetime
@@ -33,11 +25,12 @@ class Project(Base):
     total_credits = Column(Integer)
     cost_per_credit = Column(Float)
     needed_credits = Column(Integer)
-    tags = relationship("Tag", secondary="tags_projects", back_populates="projects")
+    tags = relationship("Tag", secondary="project_tags", back_populates="projects")
+    owner_id = Column(Integer, ForeignKey("users.id"))
     owner = relationship("User", back_populates="projects_owned")
-    backers = relationship(
-        "User", secondary="backers_projects", back_populates="project"
-    )
+    # backers = relationship(
+    #     "User", secondary="backers_projects", back_populates="projects"
+    # )
 
     def __repr__(self):
         return f"{self.title}: {self.tags}"

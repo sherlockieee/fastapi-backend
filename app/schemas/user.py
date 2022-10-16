@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import BaseModel, EmailStr
 
@@ -21,8 +21,13 @@ class UserUpdate(UserBase):
     password: Optional[str] = None
 
 
+class UserInProject(UserBase):
+    pass
+
+
 class UserInDBBase(UserBase):
     id: Optional[int] = None
+    projects_owned: Optional[List["ProjectInUser"]] = []
 
     class Config:
         orm_mode = True
@@ -34,3 +39,10 @@ class UserOut(UserInDBBase):
 
 class UserInDB(UserInDBBase):
     hashed_password: str
+
+
+from app.schemas.project import ProjectInUser
+
+UserInDBBase.update_forward_refs()
+UserOut.update_forward_refs()
+UserInDB.update_forward_refs()
