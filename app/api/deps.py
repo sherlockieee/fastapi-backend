@@ -11,10 +11,10 @@ from app.schemas.token import TokenPayload
 from app.config import settings
 from app.db.session import SessionLocal
 
-reusable_oauth2 = OAuth2PasswordBearer(tokenUrl="/users/login", scheme_name="JWT")
+reusable_oauth2 = OAuth2PasswordBearer(tokenUrl="/users/login")
 
 
-def get_db():
+def get_db() -> Generator:
     try:
         db = SessionLocal()
         db.execute("SELECT 1")

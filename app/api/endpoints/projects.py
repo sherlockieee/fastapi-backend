@@ -44,6 +44,8 @@ def create_project(
     print(project_dict)
     new_project = models.Project(**project_dict, owner_id=current_user.id)
     db.add(new_project)
+
+    # update project owner status
     db.commit()
     db.refresh(new_project)
 
@@ -59,8 +61,7 @@ def create_project(
     # db.commit()
     # db.refresh(new_project)
 
-    print(jsonable_encoder(new_project))
-    return jsonable_encoder(new_project)
+    return new_project
 
 
 @router.post(
