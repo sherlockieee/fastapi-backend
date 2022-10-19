@@ -29,6 +29,7 @@ class UserInProject(UserBase):
 class UserInDBBase(UserBase):
     id: int
     projects_owned: Optional[List["ProjectInUser"]]
+    projects_backed: Optional[List["ProjectInUser"]]
 
     class Config:
         orm_mode = True

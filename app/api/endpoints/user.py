@@ -7,7 +7,7 @@ from typing import List
 from app.schemas.token import Token
 from app.schemas.user import UserCreate, UserInDB, UserOut
 from app.utils.password import get_hashed_password, verify_password
-from app.utils.token import create_access_token, create_refresh_token
+from app.utils.token import create_access_token
 from app.api.deps import get_db, get_current_user
 import app.models as models
 from app.config import settings

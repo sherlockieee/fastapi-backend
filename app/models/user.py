@@ -19,6 +19,6 @@ class User(Base):
     is_admin = Column(Boolean, default=False)
     joined_date = Column(DateTime, default=datetime.utcnow)
     projects_owned = relationship("Project", back_populates="owner")
-    # projects_backed = relationship(
-    #     "Project", secondary="backers_projects", back_populates="project"
-    # )
+    projects_backed = relationship(
+        "Project", secondary="backers_projects_orders", back_populates="backers"
+    )

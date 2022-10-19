@@ -16,7 +16,7 @@ class ProjectBase(BaseModel):
     end_date: datetime
     total_credits: Optional[int] = 0
     cost_per_credit: Optional[float] = 0
-    needed_credits: Optional[int] = 0
+    credits_sold: Optional[int] = 0
 
 
 class ProjectIn(ProjectBase):
@@ -48,6 +48,7 @@ class Project(ProjectIn):
     uuid: UUID
     created: datetime
     owner: Optional["UserInProject"] = None
+    backers: Optional[List["UserInProject"]] = None
 
     class Config:
         use_enum_values = True

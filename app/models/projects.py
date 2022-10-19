@@ -24,13 +24,13 @@ class Project(Base):
     end_date = Column(DateTime)
     total_credits = Column(Integer)
     cost_per_credit = Column(Float)
-    needed_credits = Column(Integer)
+    credits_sold = Column(Integer)
     tags = relationship("Tag", secondary="project_tags", back_populates="projects")
     owner_id = Column(Integer, ForeignKey("users.id"))
     owner = relationship("User", back_populates="projects_owned")
-    # backers = relationship(
-    #     "User", secondary="backers_projects", back_populates="projects"
-    # )
+    backers = relationship(
+        "User", secondary="backers_projects_orders", back_populates="projects_backed"
+    )
 
     def __repr__(self):
         return f"{self.title}: {self.tags}"
