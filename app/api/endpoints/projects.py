@@ -41,7 +41,6 @@ def create_project(
     project_dict = jsonable_encoder(project)
     # project_tags = project_dict["tags"]
     # project_dict["tags"] = []
-    print(project_dict)
     new_project = models.Project(**project_dict, owner_id=current_user.id)
     db.add(new_project)
 

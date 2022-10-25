@@ -28,8 +28,8 @@ class UserInProject(UserBase):
 
 class UserInDBBase(UserBase):
     id: int
-    projects_owned: Optional[List["ProjectInUser"]]
-    projects_backed: Optional[List["ProjectInUser"]]
+    projects_owned: Optional[List["ProjectInOwner"]]
+    projects_backed: Optional[List["ProjectInBacker"]]
 
     class Config:
         orm_mode = True
@@ -43,7 +43,7 @@ class UserInDB(UserInDBBase):
     hashed_password: str
 
 
-from app.schemas.project import ProjectInUser
+from app.schemas.project import ProjectInBacker, ProjectInOwner
 
 UserInDBBase.update_forward_refs()
 UserOut.update_forward_refs()

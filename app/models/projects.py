@@ -11,7 +11,11 @@ class Project(Base):
     __tablename__ = "projects"
 
     id = Column(
-        Integer, primary_key=True, index=True, autoincrement=True, nullable=False
+        Integer,
+        primary_key=True,
+        index=True,
+        autoincrement=True,
+        unique=True,
     )
     uuid = Column(UUID(as_uuid=True), default=uuid4, index=True, nullable=False)
     title = Column(String, nullable=False, index=True)

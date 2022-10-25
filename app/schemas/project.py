@@ -33,7 +33,7 @@ class ProjectInTag(ProjectBase):
         orm_mode = True
 
 
-class ProjectInUser(ProjectBase):
+class ProjectInOwner(ProjectBase):
     id: int
     uuid: UUID
     created: datetime
@@ -41,6 +41,10 @@ class ProjectInUser(ProjectBase):
 
     class Config:
         orm_mode = True
+
+
+class ProjectInBacker(ProjectInOwner):
+    owner: Optional["UserInProject"] = None
 
 
 class Project(ProjectIn):
@@ -63,7 +67,8 @@ from app.schemas.tag import TagInProject, TagInProjectIn
 from app.schemas.user import UserInProject
 
 ProjectInTag.update_forward_refs()
-ProjectInUser.update_forward_refs()
+ProjectInOwner.update_forward_refs()
+ProjectInBacker.update_forward_refs()
 ProjectIn.update_forward_refs()
 Project.update_forward_refs()
 ProjectOut.update_forward_refs()
