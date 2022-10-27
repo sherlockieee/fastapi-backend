@@ -44,16 +44,16 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
             detail="User with this email already exist",
         )
 
-    user_obj = models.User(
+    user = models.User(
         email=user.email,
         hashed_password=get_hashed_password(user.password),
         full_name=user.full_name,
         preferred_name=user.preferred_name or user.full_name,
         is_admin=user.is_admin,
     )
-    db.add(user_obj)
+    db.add(user)
     db.commit()
-    db.refresh(user_obj)
+    db.refresh(user)
     return user
 
 
