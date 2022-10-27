@@ -18,6 +18,9 @@ def test_create_project(client: TestClient, db: Session) -> None:
         "total_backers": 380,
         "description": "We hope to remove 10,000 tonnes of CO2 by 2025 using biochar as a fertilizer in rural regions in Vietnam. This project has been piloted in Da Nang, and the result has been positive: farms with biochar application are able to produce 30% more output while also drawing down 43% more carbon into the soil.",
         "tags": [],
+        "total_credits": 100,
+        "cost_per_credit": 100,
+        "credits_sold": 0,
     }
 
     response = client.post("/projects/", json=data)
@@ -30,9 +33,14 @@ def test_create_project(client: TestClient, db: Session) -> None:
     assert content["total_raised"] == data["total_raised"]
     assert content["total_backers"] == data["total_backers"]
     assert content["description"] == data["description"]
+    assert content["total_credits"] == data["total_credits"]
+    assert content["cost_per_credit"] == data["cost_per_credit"]
+    assert content["credits_sold"] == data["credits_sold"]
     assert "id" in content
     assert "created" in content
     assert "uuid" in content
+    assert backers in content
+    assert owner in content
 
 
 def test_add_tag_to_project(client: TestClient, db: Session):
@@ -45,6 +53,9 @@ def test_add_tag_to_project(client: TestClient, db: Session):
         "total_backers": 380,
         "description": "We hope to remove 10,000 tonnes of CO2 by 2025 using biochar as a fertilizer in rural regions in Vietnam. This project has been piloted in Da Nang, and the result has been positive: farms with biochar application are able to produce 30% more output while also drawing down 43% more carbon into the soil.",
         "tags": [],
+        "total_credits": 100,
+        "cost_per_credit": 100,
+        "credits_sold": 0,
     }
 
     project_response = client.post("/projects/", json=data)

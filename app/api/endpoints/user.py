@@ -1,7 +1,7 @@
 from fastapi import status, HTTPException, APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from typing import List
 
 from app.schemas.token import Token
@@ -17,7 +17,17 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 @router.get("/", response_model=List[UserOut])
 def get_users(db: Session = Depends(get_db), offset: int = 0, limit: int = 100):
-    all_users = db.query(models.User).offset(offset).limit(limit).all()
+    all_users = (
+        db.query(models.User)
+        .options(
+            joinedload(models.User.projects_backed).options(
+                joinedload(models.BackerProjectOrder.project)
+            )
+        )
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
     return all_users
 
 

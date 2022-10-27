@@ -40,6 +40,11 @@ def create_transaction(
 
     project = (
         db.query(models.Project)
+        .options(
+            joinedload(models.Project.backers).options(
+                joinedload(models.BackerProjectOrder.backer)
+            )
+        )
         .filter(models.Project.id == transaction.project_id)
         .first()
     )
@@ -57,7 +62,14 @@ def create_transaction(
     db.add(new_transaction)
     project.credits_sold += transaction_dict["quantity"]
     project.total_raised += transaction_dict["amount"]
-    project.total_backers += 1
+
+    def get_id(backer):
+        return backer["backer_id"]
+
+    all_backers = set(map(get_id, jsonable_encoder(project.backers)))
+
+    if current_user.id not in all_backers:
+        project.total_backers += 1
 
     db.commit()
     db.refresh(new_transaction)

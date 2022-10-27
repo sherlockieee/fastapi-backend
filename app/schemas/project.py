@@ -1,6 +1,7 @@
 from datetime import datetime
 from pydantic import BaseModel
-from typing import List, Optional
+from pydantic.utils import GetterDict
+from typing import List, Optional, Any
 from uuid import UUID
 
 from app.schemas.currency import Currency
@@ -28,7 +29,7 @@ class ProjectInTag(ProjectBase):
     uuid: UUID
     created: datetime
     owner: Optional["UserInProject"] = None
-    backers: Optional[List["UserInProject"]] = None
+    backers: Optional[List["UserInProjectNested"]] = None
 
     class Config:
         orm_mode = True
@@ -39,7 +40,7 @@ class ProjectInOwner(ProjectBase):
     uuid: UUID
     created: datetime
     tags: List["TagInProject"]
-    backers: Optional[List["UserInProject"]] = None
+    backers: Optional[List["UserInProjectNested"]] = None
 
     class Config:
         orm_mode = True
@@ -56,12 +57,42 @@ class ProjectInBacker(ProjectBase):
         orm_mode = True
 
 
+class BackerProjectGetter(GetterDict):
+    def get(self, key: str, default: Any = None) -> Any:
+        if key in {
+            "id",
+            "uuid",
+            "created",
+            "tags",
+            "owner",
+            "title",
+            "funding_needed",
+            "currency",
+            "total_raised",
+            "total_backers",
+            "description",
+            "end_date",
+            "total_credits",
+            "cost_per_credit",
+            "credits_sold",
+        }:
+            return getattr(self._obj.project, key)
+        else:
+            return super(BackerProjectGetter, self).get(key, default)
+
+
+class ProjectInBackerNested(ProjectInBacker):
+    class Config:
+        orm_mode = True
+        getter_dict = BackerProjectGetter
+
+
 class Project(ProjectIn):
     id: int
     uuid: UUID
     created: datetime
     owner: Optional["UserInProject"] = None
-    backers: Optional[List["UserInProject"]] = None
+    backers: Optional[List["UserInProjectNested"]] = None
 
     class Config:
         use_enum_values = True
@@ -73,11 +104,12 @@ class ProjectOut(Project):
 
 
 from app.schemas.tag import TagInProject, TagInProjectIn
-from app.schemas.user import UserInProject
+from app.schemas.user import UserInProject, UserInProjectNested
 
 ProjectInTag.update_forward_refs()
 ProjectInOwner.update_forward_refs()
 ProjectInBacker.update_forward_refs()
+ProjectInBackerNested.update_forward_refs()
 ProjectIn.update_forward_refs()
 Project.update_forward_refs()
 ProjectOut.update_forward_refs()
