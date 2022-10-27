@@ -1,16 +1,31 @@
-import json
+from typing import List
 from fastapi import APIRouter, Depends, status, HTTPException
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy.orm import Session
-from sqlalchemy import insert
+from sqlalchemy.orm import Session, joinedload
 
 
 import app.models as models
-from app.api.deps import get_current_active_user, get_current_user, get_db
+from app.api.deps import get_current_active_user, get_db
+from app.models.backers_projects_orders import BackerProjectOrder
 import app.schemas.transaction as schema
 from app.schemas.backer_status import BackerStatus
 
 router = APIRouter(prefix="/transactions", tags=["transactions"])
+
+
+@router.get("/", status_code=200, response_model=List[schema.TransactionOut])
+def get_transactions(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_active_user),
+):
+    transactions = (
+        db.query(BackerProjectOrder)
+        .options(joinedload(BackerProjectOrder.backer))
+        .options(joinedload(BackerProjectOrder.project))
+        .all()
+    )
+
+    return transactions
 
 
 @router.post(
@@ -19,7 +34,7 @@ router = APIRouter(prefix="/transactions", tags=["transactions"])
 def create_transaction(
     transaction: schema.TransactionIn,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user),
+    current_user: models.User = Depends(get_current_active_user),
 ):
     transaction_dict = jsonable_encoder(transaction)
 
@@ -31,17 +46,11 @@ def create_transaction(
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
 
-    print(project.total_credits)
-    print(project.credits_sold)
-    print(transaction_dict["quantity"])
     if (project.total_credits - project.credits_sold) < transaction_dict["quantity"]:
         raise HTTPException(
             status_code=404, detail="Buying more credits than is available."
         )
 
-    # new_transaction = models.BackerProjectOrder(
-    #     **transaction_dict, backer_id=current_user.id, status=BackerStatus.SUCCESS
-    # )
     new_transaction = models.BackerProjectOrder(
         **transaction_dict, backer_id=current_user.id, status=BackerStatus.SUCCESS
     )
@@ -52,5 +61,12 @@ def create_transaction(
 
     db.commit()
     db.refresh(new_transaction)
+    transaction = (
+        db.query(BackerProjectOrder)
+        .options(joinedload(BackerProjectOrder.backer))
+        .options(joinedload(BackerProjectOrder.project))
+        .where(BackerProjectOrder.id == new_transaction.id)
+        .one()
+    )
 
     return new_transaction

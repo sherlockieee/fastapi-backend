@@ -32,9 +32,7 @@ class Project(Base):
     tags = relationship("Tag", secondary="project_tags", back_populates="projects")
     owner_id = Column(Integer, ForeignKey("users.id"))
     owner = relationship("User", back_populates="projects_owned")
-    backers = relationship(
-        "User", secondary="backers_projects_orders", back_populates="projects_backed"
-    )
+    backers = relationship("BackerProjectOrder", back_populates="project")
 
     def __repr__(self):
         return f"{self.title}: {self.tags}"

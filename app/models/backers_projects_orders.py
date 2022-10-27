@@ -1,6 +1,7 @@
 from datetime import datetime
 from enum import Enum
 from sqlalchemy import Column, ForeignKey, Integer, Float, Enum, DateTime
+from sqlalchemy.orm import relationship
 from app.db.base_class import Base
 from app.schemas.backer_status import BackerStatus
 from app.schemas.currency import Currency
@@ -16,5 +17,8 @@ class BackerProjectOrder(Base):
     quantity = Column(Integer, nullable=False)
     amount = Column(Float, nullable=False)
     date_ordered = Column(DateTime(timezone=True), default=datetime.utcnow)
-    status = Column(Enum(BackerStatus))
+    status = Column(Enum(BackerStatus, create_type=False))
     currency = Column(Enum(Currency))
+
+    backer = relationship("User", back_populates="projects_backed")
+    project = relationship("Project", back_populates="backers")
