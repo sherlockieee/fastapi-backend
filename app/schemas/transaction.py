@@ -16,6 +16,7 @@ class TransactionIn(TransactionBase):
 
 
 class TransactionOut(TransactionBase):
+    id: int
     date_ordered: datetime
     backer: "UserInProject"
     project: "ProjectInBacker"

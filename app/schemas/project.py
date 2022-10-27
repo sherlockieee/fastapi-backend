@@ -28,6 +28,7 @@ class ProjectInTag(ProjectBase):
     uuid: UUID
     created: datetime
     owner: Optional["UserInProject"] = None
+    backers: Optional[List["UserInProject"]] = None
 
     class Config:
         orm_mode = True
@@ -38,13 +39,21 @@ class ProjectInOwner(ProjectBase):
     uuid: UUID
     created: datetime
     tags: List["TagInProject"]
+    backers: Optional[List["UserInProject"]] = None
 
     class Config:
         orm_mode = True
 
 
-class ProjectInBacker(ProjectInOwner):
+class ProjectInBacker(ProjectBase):
+    id: int
+    uuid: UUID
+    created: datetime
+    tags: List["TagInProject"]
     owner: Optional["UserInProject"] = None
+
+    class Config:
+        orm_mode = True
 
 
 class Project(ProjectIn):
