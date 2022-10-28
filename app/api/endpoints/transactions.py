@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session, joinedload
 import app.models as models
 from app.api.deps import get_current_active_user, get_db
 from app.models.backers_projects_orders import BackerProjectOrder
+from app.deps.email.email import Email
 import app.schemas.transaction as schema
 from app.schemas.backer_status import BackerStatus
 
@@ -31,7 +32,7 @@ def get_transactions(
 @router.post(
     "/", status_code=status.HTTP_201_CREATED, response_model=schema.TransactionOut
 )
-def create_transaction(
+async def create_transaction(
     transaction: schema.TransactionIn,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_active_user),
@@ -71,8 +72,30 @@ def create_transaction(
     if current_user.id not in all_backers:
         project.total_backers += 1
 
-    db.commit()
-    db.refresh(new_transaction)
+    try:
+        # send success email to backer
+        await Email(
+            current_user.preferred_name, [current_user.email]
+        ).send_transaction_success()
+        # send success email to project owner
+        await Email(
+            project.owner.preferred_name, [project.owner.email]
+        ).send_transaction_success_for_owner(
+            person_supporting=current_user.preferred_name,
+            no_of_credits=transaction_dict["quantity"],
+            amount=transaction_dict["amount"],
+        )
+
+        db.commit()
+    except Exception as error:
+        print(error)
+        new_transaction.status = BackerStatus.PENDING
+        db.commit()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="There was an error sending email",
+        )
+
     transaction = (
         db.query(BackerProjectOrder)
         .options(joinedload(BackerProjectOrder.backer))
@@ -81,4 +104,4 @@ def create_transaction(
         .one()
     )
 
-    return new_transaction
+    return transaction
