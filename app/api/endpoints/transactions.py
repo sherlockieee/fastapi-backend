@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, status, HTTPException, BackgroundTasks
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session, joinedload
 
@@ -33,6 +33,7 @@ def get_transactions(
     "/", status_code=status.HTTP_201_CREATED, response_model=schema.TransactionOut
 )
 async def create_transaction(
+    background_tasks: BackgroundTasks,
     transaction: schema.TransactionIn,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_active_user),
@@ -74,18 +75,18 @@ async def create_transaction(
 
     try:
         # send success email to backer
-        await Email(
+        Email(
             current_user.preferred_name, [current_user.email]
-        ).send_transaction_success()
+        ).send_transaction_success(background_tasks=background_tasks)
         # send success email to project owner
-        await Email(
+        Email(
             project.owner.preferred_name, [project.owner.email]
         ).send_transaction_success_for_owner(
+            background_tasks=background_tasks,
             person_supporting=current_user.preferred_name,
             no_of_credits=transaction_dict["quantity"],
             amount=transaction_dict["amount"],
         )
-
         db.commit()
     except Exception as error:
         print(error)

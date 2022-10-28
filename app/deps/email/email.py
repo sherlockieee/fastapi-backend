@@ -1,4 +1,6 @@
 from typing import List
+from fastapi import BackgroundTasks
+from starlette.responses import JSONResponse
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 from pydantic import EmailStr, BaseModel
 from jinja2 import Environment, select_autoescape, PackageLoader
@@ -24,7 +26,7 @@ class Email:
         self.sender = "Admin @ X | Kickstarter for Climate"
         self.email = email
 
-    async def send_mail(self, subject, template, **kwargs):
+    def generate_mail(self, subject: str, template: str, **kwargs):
         # Define the config
         conf = ConnectionConfig(
             MAIL_USERNAME=settings.EMAIL_USERNAME,
@@ -40,24 +42,40 @@ class Email:
         # Generate the HTML template base on the template name
         template = env.get_template(f"{template}.html")
         html = template.render(name=self.name, subject=subject, **kwargs)
-        # Define the message options
         message = MessageSchema(
             subject=subject, recipients=self.email, body=html, subtype="html"
         )
+        return conf, message
 
-        # Send the email
+    async def send_mail_async(self, subject: str, template: str, **kwargs):
+        conf, message = self.generate_mail(subject, template, **kwargs)
         fm = FastMail(conf)
         await fm.send_message(message)
 
-    async def send_transaction_success(self):
-        await self.send_mail("Your transaction is successful!", "transaction_success")
-
-    async def send_transaction_success_for_owner(
-        self, person_supporting, no_of_credits, amount
+    def send_email_background(
+        self, background_tasks: BackgroundTasks, subject: str, template: str, **kwargs
     ):
-        await self.send_mail(
-            f"{person_supporting} bought credits from your project",
-            "transaction_success_owner",
+
+        conf, message = self.generate_mail(subject, template, **kwargs)
+        fm = FastMail(conf)
+        background_tasks.add_task(fm.send_message, message)
+
+        return JSONResponse(status_code=200, content={"message": "email has been sent"})
+
+    def send_transaction_success(self, background_tasks):
+        self.send_email_background(
+            background_tasks=background_tasks,
+            subject="Your transaction is successful!",
+            template="transaction_success",
+        )
+
+    def send_transaction_success_for_owner(
+        self, background_tasks, person_supporting, no_of_credits, amount
+    ):
+        self.send_email_background(
+            background_tasks=background_tasks,
+            subject=f"{person_supporting} bought credits from your project",
+            template="transaction_success_owner",
             person_supporting=person_supporting,
             no_of_credits=no_of_credits,
             amount=amount,
