@@ -4,7 +4,7 @@ from sqlalchemy import (
     String,
 )
 from sqlalchemy.orm import relationship
-from app.db import Base
+from app.db.base_class import Base
 
 
 class Tag(Base):
@@ -13,4 +13,7 @@ class Tag(Base):
         Integer, primary_key=True, index=True, autoincrement=True, nullable=False
     )
     name = Column(String, nullable=False)
-    projects = relationship("ProjectTag", back_populates="tag")
+    projects = relationship("Project", secondary="project_tags", back_populates="tags")
+
+    def __repr__(self):
+        return f"{self.name}"
