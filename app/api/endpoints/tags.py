@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 
 import app.models as models
-from app.main import get_db
+from app.api.deps import get_db
 import app.schemas.tag as schema
 
 router = APIRouter(prefix="/tags", tags=["tags"])

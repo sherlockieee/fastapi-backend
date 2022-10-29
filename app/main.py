@@ -27,17 +27,6 @@ app.add_middleware(
 )
 
 
-def get_db():
-    try:
-        db = SessionLocal()
-        db.execute("SELECT 1")
-        yield db
-    except Exception as e:
-        raise e
-    finally:
-        db.close()
-
-
 from app.api.api import router
 
 app.include_router(router)

@@ -1,11 +1,12 @@
 from typing import List
 from fastapi import APIRouter, Depends, status, HTTPException
-from sqlalchemy.orm import Session
+from fastapi.encoders import jsonable_encoder
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import insert
 
 
 import app.models as models
-from app.main import get_db
+from app.api.deps import get_current_active_user, get_db
 import app.schemas.project as schema
 from app.models import project_tags
 
@@ -14,41 +15,70 @@ router = APIRouter(prefix="/projects", tags=["projects"])
 
 
 @router.get("/", response_model=List[schema.ProjectOut])
-def get_projects(db: Session = Depends(get_db), offset: int = 0, limit: int = 100):
-    all_projects = db.query(models.Project).offset(offset).limit(limit).all()
+def get_projects(
+    db: Session = Depends(get_db),
+    offset: int = 0,
+    limit: int = 100,
+):
+    all_projects = (
+        db.query(models.Project)
+        .options(
+            joinedload(models.Project.backers).options(
+                joinedload(models.BackerProjectOrder.backer)
+            )
+        )
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
     return all_projects
 
 
 @router.get("/{project_id}", response_model=schema.ProjectOut)
 def get_one_project(project_id: int, db: Session = Depends(get_db)):
-    project = db.query(models.Project).filter(models.Project.id == project_id).first()
+    project = (
+        db.query(models.Project)
+        .options(
+            joinedload(models.Project.backers).options(
+                joinedload(models.BackerProjectOrder.backer)
+            )
+        )
+        .filter(models.Project.id == project_id)
+        .first()
+    )
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
     return project
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schema.ProjectOut)
-def create_project(project: schema.ProjectIn, db: Session = Depends(get_db)):
-    project_dict = project.dict()
-    project_tags = project_dict["tags"]
-    project_dict["tags"] = []
-
-    new_project = models.Project(**project_dict)
+def create_project(
+    project: schema.ProjectIn,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_active_user),
+):
+    project_dict = jsonable_encoder(project)
+    # project_tags = project_dict["tags"]
+    # project_dict["tags"] = []
+    new_project = models.Project(**project_dict, owner_id=current_user.id)
     db.add(new_project)
+
+    # update project owner status
     db.commit()
     db.refresh(new_project)
 
-    for tag in project_tags:
-        existing = db.query(models.Tag).filter(models.Tag.id == tag["id"]).first()
-        if existing:
-            new_project.tags.append(existing)
-        if not existing:
-            new_tag = models.Tag(name=tag["name"])
-            new_project.tags.append(new_tag)
-            db.add(new_tag)
+    # for tag in project_tags:
+    #     existing = db.query(models.Tag).filter(models.Tag.id == tag["id"]).first()
+    #     if existing:
+    #         new_project.tags.append(existing)
+    #     if not existing:
+    #         new_tag = models.Tag(name=tag["name"])
+    #         new_project.tags.append(new_tag)
+    #         db.add(new_tag)
 
-    db.commit()
-    db.refresh(new_project)
+    # db.commit()
+    # db.refresh(new_project)
+
     return new_project
 
 
