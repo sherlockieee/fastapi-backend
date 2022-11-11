@@ -97,6 +97,9 @@ async def create_transaction(
             detail="There was an error sending email",
         )
 
+    if project.total_raised >= project.funding_needed:
+        send_email_when_funding_reaches(background_tasks, project)
+
     transaction = (
         db.query(BackerProjectOrder)
         .options(joinedload(BackerProjectOrder.backer))
@@ -106,3 +109,32 @@ async def create_transaction(
     )
 
     return transaction
+
+
+def send_email_when_funding_reaches(background_tasks: BackgroundTasks, project):
+    project_backers = set(transaction.backer for transaction in project.backers)
+
+    def get_total_credits_bought(transactions, project_backer):
+        total_credits_bought = 0
+        for transaction in project.backers:
+            if project_backer == transaction.backer:
+                total_credits_bought += transaction.quantity
+        return total_credits_bought
+
+    for project_backer in project_backers:
+        credits_bought = get_total_credits_bought(project.backers, project_backer)
+
+        Email(
+            project_backer.preferred_name, [project_backer.email]
+        ).send_project_successfully_funded(
+            background_tasks, project.title, credits_bought, project.credits_sold
+        )
+
+    # send success email to project owner
+    Email(
+        project.owner.preferred_name, [project.owner.email]
+    ).send_project_successfully_funded_for_owner(
+        background_tasks=background_tasks,
+        project_name=project.title,
+        no_of_backers=len(project_backers),
+    )

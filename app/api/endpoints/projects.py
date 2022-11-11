@@ -22,6 +22,7 @@ def get_projects(
 ):
     all_projects = (
         db.query(models.Project)
+        .filter(models.Project.credits_sold < models.Project.total_credits)
         .options(
             joinedload(models.Project.backers).options(
                 joinedload(models.BackerProjectOrder.backer)
@@ -29,6 +30,34 @@ def get_projects(
         )
         .offset(offset)
         .limit(limit)
+        .all()
+    )
+    return all_projects
+
+
+@router.get("/me/backer", response_model=List[schema.ProjectOut])
+def get_all_projects_backed_by_current_user(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_active_user),
+):
+    all_projects = (
+        db.query(models.Project)
+        .join(models.BackerProjectOrder)
+        .join(models.User)
+        .filter(models.Project.backers.any(models.User.id == current_user.id))
+        .all()
+    )
+    return all_projects
+
+
+@router.get("/me/owner", response_model=List[schema.ProjectOut])
+def get_all_projects_owned_by_current_user(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_active_user),
+):
+    all_projects = (
+        db.query(models.Project)
+        .filter(models.Project.owner_id == current_user.id)
         .all()
     )
     return all_projects

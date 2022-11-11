@@ -1,11 +1,11 @@
 from typing import Optional, List, Any
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from pydantic.utils import GetterDict
 
 
 class UserBase(BaseModel):
-    email: EmailStr
+    email: str
     is_active: Optional[bool] = True
     is_admin: Optional[bool] = False
     full_name: str

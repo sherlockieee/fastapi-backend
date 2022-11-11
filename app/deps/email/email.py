@@ -80,3 +80,29 @@ class Email:
             no_of_credits=no_of_credits,
             amount=amount,
         )
+
+    def send_project_successfully_funded(
+        self, background_tasks, project_name, no_of_credits_bought, no_of_credits_sold
+    ):
+        self.send_email_background(
+            background_tasks,
+            f"The project you support, {project_name}, is fully funded!",
+            "project_fully_funded",
+            project_name=project_name,
+            no_of_credits_bought=no_of_credits_bought,
+            no_of_credits_sold=no_of_credits_sold,
+        )
+
+    def send_project_successfully_funded_for_owner(
+        self,
+        background_tasks,
+        project_name,
+        no_of_backers,
+    ):
+        self.send_email_background(
+            background_tasks,
+            f"Your project {project_name} is fully funded!",
+            "project_fully_funded_owner",
+            project_name=project_name,
+            no_of_backers=no_of_backers,
+        )
