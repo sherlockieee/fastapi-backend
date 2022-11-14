@@ -8,6 +8,8 @@ dev = "uvicorn app.main:app --reload"
 test = "pytest app/tests"
 lint = "black app"
 lintcheck = "black --check app"
+alembiccreate = "alembic revision --autogenerate"
+alembicupgrade = "alembic upgrade head"
 
 [packages]
 anyio = "==3.6.1"

@@ -7,9 +7,13 @@ from sqlalchemy.orm import Session, joinedload
 import app.models as models
 from app.api.deps import get_current_active_user, get_db
 from app.models.backers_projects_orders import BackerProjectOrder
-from app.deps.email.email import Email
 import app.schemas.transaction as schema
 from app.schemas.backer_status import BackerStatus
+from app.schemas.project_status import ProjectStatus
+from app.utils.emails import (
+    send_email_when_funding_reaches,
+    send_email_when_transaction_succeeds,
+)
 
 router = APIRouter(prefix="/transactions", tags=["transactions"])
 
@@ -17,7 +21,6 @@ router = APIRouter(prefix="/transactions", tags=["transactions"])
 @router.get("/", status_code=200, response_model=List[schema.TransactionOut])
 def get_transactions(
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_active_user),
 ):
     transactions = (
         db.query(BackerProjectOrder)
@@ -53,6 +56,9 @@ async def create_transaction(
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
 
+    if project.status != ProjectStatus.IN_FUNDING:
+        raise HTTPException(status_code=404, detail="Project is no longer in funding")
+
     if (project.total_credits - project.credits_sold) < transaction_dict["quantity"]:
         raise HTTPException(
             status_code=404, detail="Buying more credits than is available."
@@ -74,31 +80,21 @@ async def create_transaction(
         project.total_backers += 1
 
     try:
-        # send success email to backer
-        Email(
-            current_user.preferred_name, [current_user.email]
-        ).send_transaction_success(background_tasks=background_tasks)
-        # send success email to project owner
-        Email(
-            project.owner.preferred_name, [project.owner.email]
-        ).send_transaction_success_for_owner(
-            background_tasks=background_tasks,
-            person_supporting=current_user.preferred_name,
-            no_of_credits=transaction_dict["quantity"],
-            amount=transaction_dict["amount"],
+        send_email_when_transaction_succeeds(
+            background_tasks, transaction_dict, project.owner, current_user
         )
-        db.commit()
     except Exception as error:
         print(error)
         new_transaction.status = BackerStatus.PENDING
-        db.commit()
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="There was an error sending email",
-        )
 
     if project.total_raised >= project.funding_needed:
-        send_email_when_funding_reaches(background_tasks, project)
+        project.status = ProjectStatus.SUCCESS
+        try:
+            send_email_when_funding_reaches(background_tasks, project)
+        except Exception as error:
+            print(error)
+
+    db.commit()
 
     transaction = (
         db.query(BackerProjectOrder)
@@ -109,32 +105,3 @@ async def create_transaction(
     )
 
     return transaction
-
-
-def send_email_when_funding_reaches(background_tasks: BackgroundTasks, project):
-    project_backers = set(transaction.backer for transaction in project.backers)
-
-    def get_total_credits_bought(transactions, project_backer):
-        total_credits_bought = 0
-        for transaction in project.backers:
-            if project_backer == transaction.backer:
-                total_credits_bought += transaction.quantity
-        return total_credits_bought
-
-    for project_backer in project_backers:
-        credits_bought = get_total_credits_bought(project.backers, project_backer)
-
-        Email(
-            project_backer.preferred_name, [project_backer.email]
-        ).send_project_successfully_funded(
-            background_tasks, project.title, credits_bought, project.credits_sold
-        )
-
-    # send success email to project owner
-    Email(
-        project.owner.preferred_name, [project.owner.email]
-    ).send_project_successfully_funded_for_owner(
-        background_tasks=background_tasks,
-        project_name=project.title,
-        no_of_backers=len(project_backers),
-    )

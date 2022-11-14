@@ -5,6 +5,7 @@ from typing import List, Optional, Any
 from uuid import UUID
 
 from app.schemas.currency import Currency
+from app.schemas.project_status import ProjectStatus
 
 
 class ProjectBase(BaseModel):
@@ -18,6 +19,7 @@ class ProjectBase(BaseModel):
     total_credits: Optional[int] = 0
     cost_per_credit: Optional[float] = 0
     credits_sold: Optional[int] = 0
+    status: Optional[ProjectStatus] = ProjectStatus.IN_FUNDING
 
 
 class ProjectIn(ProjectBase):
@@ -103,6 +105,10 @@ class ProjectOut(Project):
     pass
 
 
+class ProjectInBackerSummary(ProjectInBacker):
+    total_credits_bought: int
+
+
 from app.schemas.tag import TagInProject, TagInProjectIn
 from app.schemas.user import UserInProject, UserInProjectNested
 
@@ -113,3 +119,4 @@ ProjectInBackerNested.update_forward_refs()
 ProjectIn.update_forward_refs()
 Project.update_forward_refs()
 ProjectOut.update_forward_refs()
+ProjectInBackerSummary.update_forward_refs()

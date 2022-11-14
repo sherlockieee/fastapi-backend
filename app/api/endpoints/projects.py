@@ -8,8 +8,9 @@ from sqlalchemy import insert
 import app.models as models
 from app.api.deps import get_current_active_user, get_db
 import app.schemas.project as schema
+from app.schemas.project_status import ProjectStatus
 from app.models import project_tags
-
+from app.utils.backers import get_total_credits_bought
 
 router = APIRouter(prefix="/projects", tags=["projects"])
 
@@ -22,7 +23,7 @@ def get_projects(
 ):
     all_projects = (
         db.query(models.Project)
-        .filter(models.Project.credits_sold < models.Project.total_credits)
+        .filter(models.Project.status == ProjectStatus.IN_FUNDING)
         .options(
             joinedload(models.Project.backers).options(
                 joinedload(models.BackerProjectOrder.backer)
@@ -35,18 +36,26 @@ def get_projects(
     return all_projects
 
 
-@router.get("/me/backer", response_model=List[schema.ProjectOut])
+@router.get("/me/backer", response_model=List[schema.ProjectInBackerSummary])
 def get_all_projects_backed_by_current_user(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_active_user),
 ):
     all_projects = (
         db.query(models.Project)
-        .join(models.BackerProjectOrder)
-        .join(models.User)
+        .options(
+            joinedload(models.Project.backers).options(
+                joinedload(models.BackerProjectOrder.backer)
+            )
+        )
         .filter(models.Project.backers.any(models.User.id == current_user.id))
         .all()
     )
+
+    print(jsonable_encoder(all_projects[0]))
+
+    for proj in all_projects:
+        proj.total_credits_bought = get_total_credits_bought(proj.backers, current_user)
     return all_projects
 
 

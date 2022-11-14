@@ -5,6 +5,7 @@ from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.db.base_class import Base
 from app.schemas.currency import Currency
+from app.schemas.project_status import ProjectStatus
 
 
 class Project(Base):
@@ -33,6 +34,7 @@ class Project(Base):
     owner_id = Column(Integer, ForeignKey("users.id"))
     owner = relationship("User", back_populates="projects_owned")
     backers = relationship("BackerProjectOrder", back_populates="project")
+    status = Column(Enum(ProjectStatus))
 
     def __repr__(self):
         return f"{self.title}: {self.tags}"
