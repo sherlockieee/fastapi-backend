@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, status, HTTPException, Query
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import insert
@@ -20,10 +20,12 @@ def get_projects(
     db: Session = Depends(get_db),
     offset: int = 0,
     limit: int = 100,
+    filtered_status: List[str] = Query(default=[ProjectStatus.IN_FUNDING]),
 ):
+    print(filtered_status, limit)
     all_projects = (
         db.query(models.Project)
-        .filter(models.Project.status == ProjectStatus.IN_FUNDING)
+        .filter(models.Project.status.in_(filtered_status))
         .options(
             joinedload(models.Project.backers).options(
                 joinedload(models.BackerProjectOrder.backer)

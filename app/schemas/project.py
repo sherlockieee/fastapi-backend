@@ -77,6 +77,7 @@ class BackerProjectGetter(GetterDict):
             "total_credits",
             "cost_per_credit",
             "credits_sold",
+            "status",
         }:
             return getattr(self._obj.project, key)
         else:
