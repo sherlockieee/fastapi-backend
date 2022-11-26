@@ -1,7 +1,7 @@
 from typing import List
 from fastapi import APIRouter, Depends, status, HTTPException, BackgroundTasks
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, contains_eager, joinedload
 
 
 import app.models as models
@@ -26,6 +26,26 @@ def get_transactions(
         db.query(BackerProjectOrder)
         .options(joinedload(BackerProjectOrder.backer))
         .options(joinedload(BackerProjectOrder.project))
+        .all()
+    )
+
+    return transactions
+
+
+@router.get("/project/{project_id}", response_model=List[schema.TransactionOut])
+def get_transactions_for_one_project(
+    project_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_active_user),
+):
+    transactions = (
+        db.query(BackerProjectOrder)
+        .join(BackerProjectOrder.project)
+        .join(BackerProjectOrder.backer)
+        .options(contains_eager(BackerProjectOrder.backer))
+        .options(contains_eager(BackerProjectOrder.project))
+        .filter(models.Project.id == project_id)
+        .filter(models.User.id == current_user.id)
         .all()
     )
 

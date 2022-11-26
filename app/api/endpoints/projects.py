@@ -22,7 +22,6 @@ def get_projects(
     limit: int = 100,
     filtered_status: List[str] = Query(default=[ProjectStatus.IN_FUNDING]),
 ):
-    print(filtered_status, limit)
     all_projects = (
         db.query(models.Project)
         .filter(models.Project.status.in_(filtered_status))
@@ -45,6 +44,8 @@ def get_all_projects_backed_by_current_user(
 ):
     all_projects = (
         db.query(models.Project)
+        .join(models.BackerProjectOrder)
+        .join(models.User)
         .options(
             joinedload(models.Project.backers).options(
                 joinedload(models.BackerProjectOrder.backer)
@@ -53,8 +54,6 @@ def get_all_projects_backed_by_current_user(
         .filter(models.Project.backers.any(models.User.id == current_user.id))
         .all()
     )
-
-    print(jsonable_encoder(all_projects[0]))
 
     for proj in all_projects:
         proj.total_credits_bought = get_total_credits_bought(proj.backers, current_user)
