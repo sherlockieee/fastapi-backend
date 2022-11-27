@@ -50,30 +50,6 @@ class Project(Base):
     status = Column(Enum(ProjectStatus))
     # updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
-    def __init__(
-        self,
-        title,
-        funding_needed,
-        currency,
-        description,
-        end_date,
-        total_credits,
-        cost_per_credits,
-        owner_id,
-        total_raised=0,
-        credits_sold=0,
-    ):
-        self.title = title
-        self.funding_needed = funding_needed
-        self.currency = currency
-        self.description = description
-        self.end_date = end_date
-        self.total_credits = total_credits
-        self.cost_per_credit = cost_per_credits
-        self.owner_id = owner_id
-        self.total_raised = total_raised
-        self.credits_sold = credits_sold
-
     def __repr__(self):
         return f"{self.title}: {self.tags}"
 
@@ -131,12 +107,21 @@ class Project(Base):
         days_difference = (
             (self.end_date - datetime.utcnow()).total_seconds() / 3600 / 24
         )
-        return days_difference
+        return max(days_difference, 0)
 
     @days_remaining.expression
     def days_remaining(cls):
-        return sa.func.round(
+        days_remaining_query = sa.func.round(
             sa.func.extract("epoch", (cls.end_date - sa.func.now())) / 86400
+        )
+        return sa.case(
+            [
+                (
+                    days_remaining_query > 0,
+                    days_remaining_query,
+                ),
+            ],
+            else_=0,
         ).label("days_remaining")
 
     @hybrid_property
