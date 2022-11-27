@@ -20,9 +20,10 @@ def get_projects(
     db: Session = Depends(get_db),
     offset: int = 0,
     limit: int = 100,
-    filtered_status: List[str] = Query(default=[ProjectStatus.IN_FUNDING]),
+    filtered_status: List[ProjectStatus] = Query(default=[ProjectStatus.IN_FUNDING]),
+    order_by: List[str] = Query(default=None),
 ):
-    all_projects = (
+    query = (
         db.query(models.Project)
         .filter(models.Project.status.in_(filtered_status))
         .options(
@@ -30,10 +31,13 @@ def get_projects(
                 joinedload(models.BackerProjectOrder.backer)
             )
         )
-        .offset(offset)
-        .limit(limit)
-        .all()
     )
+    if order_by:
+        for col in order_by:
+            if col not in schema.Project.__fields__.keys():
+                pass
+            query = query.order_by(getattr(models.Project, col))
+    all_projects = query.offset(offset).limit(limit).all()
     return all_projects
 
 

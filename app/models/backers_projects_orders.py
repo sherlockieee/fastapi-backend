@@ -22,3 +22,6 @@ class BackerProjectOrder(Base):
 
     backer = relationship("User", back_populates="projects_backed")
     project = relationship("Project", back_populates="backers")
+
+    def __getitem__(self, key):
+        return self.__dict__[key]

@@ -20,3 +20,6 @@ class User(Base):
     joined_date = Column(DateTime, default=datetime.utcnow)
     projects_owned = relationship("Project", back_populates="owner")
     projects_backed = relationship("BackerProjectOrder", back_populates="backer")
+
+    def __getitem__(self, key):
+        return self.__dict__[key]
