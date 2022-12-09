@@ -4,9 +4,7 @@ from starlette.responses import JSONResponse
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 from pydantic import EmailStr, BaseModel
 from jinja2 import Environment, select_autoescape, PackageLoader
-import sys
 
-from app import models
 from app.config import settings
 
 
@@ -23,7 +21,7 @@ class EmailSchema(BaseModel):
 class Email:
     def __init__(self, name: str, email: List[EmailStr]):
         self.name = name
-        self.sender = "Admin @ X | Kickstarter for Climate"
+        self.sender = "Admin @ CreX"
         self.email = email
 
     def generate_mail(self, subject: str, template: str, **kwargs):
@@ -51,6 +49,8 @@ class Email:
         conf, message = self.generate_mail(subject, template, **kwargs)
         fm = FastMail(conf)
         await fm.send_message(message)
+
+        return JSONResponse(status_code=200, content={"message": "email has been sent"})
 
     def send_email_background(
         self, background_tasks: BackgroundTasks, subject: str, template: str, **kwargs

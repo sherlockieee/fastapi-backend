@@ -91,14 +91,6 @@ async def create_transaction(
     project.credits_sold += transaction_dict["quantity"]
     project.total_raised += transaction_dict["amount"]
 
-    def get_id(backer):
-        return backer["backer_id"]
-
-    all_backers = set(map(get_id, jsonable_encoder(project.backers)))
-
-    if current_user.id not in all_backers:
-        project.total_backers += 1
-
     try:
         send_email_when_transaction_succeeds(
             background_tasks, transaction_dict, project.owner, current_user
