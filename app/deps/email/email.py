@@ -106,3 +106,20 @@ class Email:
             project_name=project_name,
             no_of_backers=no_of_backers,
         )
+
+    def send_project_fails(self, background_tasks, no_of_credits_bought, project_name):
+        self.send_email_background(
+            background_tasks,
+            f"Refunding from your crowdfunding project {project_name}",
+            "project_fails",
+            project_name=project_name,
+            no_of_credits_bought=no_of_credits_bought,
+        )
+
+    def send_project_fails_owner(self, background_tasks, project_name):
+        self.send_email_background(
+            background_tasks,
+            f"Your project {project_name} did not reach its crowdfunding goals",
+            "project_fails_owner",
+            project_name=project_name,
+        )

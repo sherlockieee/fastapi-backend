@@ -3,16 +3,42 @@ from fastapi import APIRouter, Depends, status, HTTPException, Query
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import insert
+from fastapi_utils.tasks import repeat_every
 
-
+from app.db.session import SessionLocal
 import app.models as models
 from app.api.deps import get_current_active_user, get_db
 import app.schemas.project as schema
 from app.schemas.project_status import ProjectStatus
 from app.models import project_tags
 from app.utils.backers import get_total_credits_bought
+from app.utils.emails import send_email_when_funding_reaches
 
 router = APIRouter(prefix="/projects", tags=["projects"])
+
+
+@router.on_event("startup")
+@repeat_every(seconds=60 * 60)  # every hour
+def update_status() -> None:
+    with SessionLocal() as db:
+        finished_projects: List[schema.Project] = (
+            db.query(models.Project)
+            .filter(models.Project.status.in_([ProjectStatus.IN_FUNDING]))
+            .filter(models.Project.days_remaining <= 0)
+            .options(
+                joinedload(models.Project.backers).options(
+                    joinedload(models.BackerProjectOrder.backer)
+                )
+            )
+            .all()
+        )
+        for project in finished_projects:
+            if project.percentage_raised < 100:
+                project.status = ProjectStatus.FAIL
+            else:
+                project.status = ProjectStatus.SUCCESS
+                send_email_when_funding_reaches()
+            db.commit()
 
 
 @router.get("/", response_model=List[schema.ProjectOut])

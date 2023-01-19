@@ -1,9 +1,7 @@
-from app.config import settings
-from app.db.session import SessionLocal
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.config import settings
 
 app_configs = {}
 if settings.ENVIRONMENT not in settings.SHOW_DOCS_ENVIRONMENT:

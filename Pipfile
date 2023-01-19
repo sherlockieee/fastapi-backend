@@ -55,6 +55,7 @@ python-jose = "*"
 bcrypt = "*"
 passlib = "*"
 fastapi-mail = "*"
+fastapi-utils = "*"
 
 [dev-packages]
 pytest = "*"

@@ -99,7 +99,7 @@ async def create_transaction(
         print(error)
         new_transaction.status = BackerStatus.PENDING
 
-    if project.total_raised >= project.funding_needed:
+    if project.credits_sold == project.total_credits:
         project.status = ProjectStatus.SUCCESS
         try:
             send_email_when_funding_reaches(background_tasks, project)

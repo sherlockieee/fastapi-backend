@@ -20,10 +20,6 @@ class ProjectBase(BaseModel):
     cost_per_credit: Optional[float] = 0
     credits_sold: Optional[int] = 0
     status: Optional[ProjectStatus] = ProjectStatus.IN_FUNDING
-    remaining_credits: int
-    remaining_funding: int
-    percentage_raised: int
-    days_remaining: int
 
 
 class ProjectIn(ProjectBase):
@@ -36,6 +32,10 @@ class ProjectInTag(ProjectBase):
     created: datetime
     owner: Optional["UserInProject"] = None
     backers: Optional[List["UserInProjectNested"]] = None
+    remaining_credits: int
+    remaining_funding: int
+    percentage_raised: int
+    days_remaining: int
 
     class Config:
         orm_mode = True
@@ -100,6 +100,10 @@ class Project(ProjectIn):
     created: datetime
     owner: Optional["UserInProject"] = None
     backers: Optional[List["UserInProjectNested"]] = None
+    remaining_credits: int
+    remaining_funding: int
+    percentage_raised: int
+    days_remaining: int
 
     class Config:
         use_enum_values = True
