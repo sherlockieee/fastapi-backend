@@ -6,9 +6,9 @@ from sqlalchemy.orm import Session, contains_eager, joinedload
 
 import app.models as models
 from app.api.deps import get_current_active_user, get_db
-from app.models.backers_projects_orders import BackerProjectOrder
+from app.models.transactions import Transaction
 import app.schemas.transaction as schema
-from app.schemas.backer_status import BackerStatus
+from app.schemas.transaction_status import TransactionStatus
 from app.schemas.project_status import ProjectStatus
 from app.utils.emails import (
     send_email_when_funding_reaches,
@@ -23,9 +23,9 @@ def get_transactions(
     db: Session = Depends(get_db),
 ):
     transactions = (
-        db.query(BackerProjectOrder)
-        .options(joinedload(BackerProjectOrder.backer))
-        .options(joinedload(BackerProjectOrder.project))
+        db.query(Transaction)
+        .options(joinedload(Transaction.backer))
+        .options(joinedload(Transaction.project))
         .all()
     )
 
@@ -39,11 +39,11 @@ def get_transactions_for_one_project(
     current_user: models.User = Depends(get_current_active_user),
 ):
     transactions = (
-        db.query(BackerProjectOrder)
-        .join(BackerProjectOrder.project)
-        .join(BackerProjectOrder.backer)
-        .options(contains_eager(BackerProjectOrder.backer))
-        .options(contains_eager(BackerProjectOrder.project))
+        db.query(Transaction)
+        .join(Transaction.project)
+        .join(Transaction.backer)
+        .options(contains_eager(Transaction.backer))
+        .options(contains_eager(Transaction.project))
         .filter(models.Project.id == project_id)
         .filter(models.User.id == current_user.id)
         .all()
@@ -67,7 +67,7 @@ async def create_transaction(
         db.query(models.Project)
         .options(
             joinedload(models.Project.backers).options(
-                joinedload(models.BackerProjectOrder.backer)
+                joinedload(models.Transaction.backer)
             )
         )
         .filter(models.Project.id == transaction.project_id)
@@ -84,8 +84,8 @@ async def create_transaction(
             status_code=404, detail="Buying more credits than is available."
         )
 
-    new_transaction = models.BackerProjectOrder(
-        **transaction_dict, backer_id=current_user.id, status=BackerStatus.SUCCESS
+    new_transaction = models.Transaction(
+        **transaction_dict, backer_id=current_user.id, status=TransactionStatus.SUCCESS
     )
     db.add(new_transaction)
     project.credits_sold += transaction_dict["quantity"]
@@ -97,7 +97,7 @@ async def create_transaction(
         )
     except Exception as error:
         print(error)
-        new_transaction.status = BackerStatus.PENDING
+        new_transaction.status = TransactionStatus.PENDING
 
     if project.credits_sold == project.total_credits:
         project.status = ProjectStatus.SUCCESS
@@ -109,10 +109,10 @@ async def create_transaction(
     db.commit()
 
     transaction = (
-        db.query(BackerProjectOrder)
-        .options(joinedload(BackerProjectOrder.backer))
-        .options(joinedload(BackerProjectOrder.project))
-        .where(BackerProjectOrder.id == new_transaction.id)
+        db.query(Transaction)
+        .options(joinedload(Transaction.backer))
+        .options(joinedload(Transaction.project))
+        .where(Transaction.id == new_transaction.id)
         .one()
     )
 

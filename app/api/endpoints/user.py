@@ -21,7 +21,7 @@ def get_users(db: Session = Depends(get_db), offset: int = 0, limit: int = 100):
         db.query(models.User)
         .options(
             joinedload(models.User.projects_backed).options(
-                joinedload(models.BackerProjectOrder.project)
+                joinedload(models.Transaction.project)
             )
         )
         .offset(offset)

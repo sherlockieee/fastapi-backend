@@ -2,7 +2,7 @@ from datetime import datetime
 from pydantic import BaseModel
 
 from app.schemas.currency import Currency
-from app.schemas.backer_status import BackerStatus
+from app.schemas.transaction_status import TransactionStatus
 
 
 class TransactionBase(BaseModel):
@@ -20,7 +20,7 @@ class TransactionOut(TransactionBase):
     date_ordered: datetime
     backer: "UserInProject"
     project: "ProjectInBacker"
-    status: BackerStatus
+    status: TransactionStatus
 
     class Config:
         orm_mode = True

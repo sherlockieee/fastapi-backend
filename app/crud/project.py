@@ -21,11 +21,11 @@ class CRUDProject:
         subquery = (
             db.query(models.Project)
             .distinct(models.Project.id)
-            .outerjoin(models.BackerProjectOrder)
+            .outerjoin(models.Transaction)
             .outerjoin(models.User)
             .options(
                 # contains_eager(models.Project.backers)
-                # .contains_eager(models.BackerProjectOrder.backer)
+                # .contains_eager(models.Transaction.backer)
                 load_only("projects_id")
             )
         )

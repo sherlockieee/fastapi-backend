@@ -12,7 +12,10 @@ import app.schemas.project as schema
 from app.schemas.project_status import ProjectStatus
 from app.models import project_tags
 from app.utils.backers import get_total_credits_bought
-from app.utils.emails import send_email_when_funding_reaches
+from app.utils.emails import (
+    send_email_when_funding_reaches,
+    send_email_when_project_fails,
+)
 
 router = APIRouter(prefix="/projects", tags=["projects"])
 
@@ -26,8 +29,8 @@ def update_status() -> None:
             .filter(models.Project.status.in_([ProjectStatus.IN_FUNDING]))
             .filter(models.Project.days_remaining <= 0)
             .options(
-                joinedload(models.Project.backers).options(
-                    joinedload(models.BackerProjectOrder.backer)
+                joinedload(models.Project.users).options(
+                    joinedload(models.Transaction.backer)
                 )
             )
             .all()
@@ -35,6 +38,8 @@ def update_status() -> None:
         for project in finished_projects:
             if project.percentage_raised < 100:
                 project.status = ProjectStatus.FAIL
+                send_email_when_project_fails()
+
             else:
                 project.status = ProjectStatus.SUCCESS
                 send_email_when_funding_reaches()
@@ -53,8 +58,8 @@ def get_projects(
         db.query(models.Project)
         .filter(models.Project.status.in_(filtered_status))
         .options(
-            joinedload(models.Project.backers).options(
-                joinedload(models.BackerProjectOrder.backer)
+            joinedload(models.Project.users).options(
+                joinedload(models.Transaction.user)
             )
         )
     )
@@ -74,19 +79,19 @@ def get_all_projects_backed_by_current_user(
 ):
     all_projects = (
         db.query(models.Project)
-        .join(models.BackerProjectOrder)
+        .join(models.Transaction)
         .join(models.User)
         .options(
-            joinedload(models.Project.backers).options(
-                joinedload(models.BackerProjectOrder.backer)
+            joinedload(models.Project.users).options(
+                joinedload(models.Transaction.backer)
             )
         )
-        .filter(models.Project.backers.any(models.User.id == current_user.id))
+        .filter(models.Project.users.any(models.User.id == current_user.id))
         .all()
     )
 
     for proj in all_projects:
-        proj.total_credits_bought = get_total_credits_bought(proj.backers, current_user)
+        proj.total_credits_bought = get_total_credits_bought(proj.users, current_user)
     return all_projects
 
 
@@ -108,8 +113,8 @@ def get_one_project(project_id: int, db: Session = Depends(get_db)):
     project = (
         db.query(models.Project)
         .options(
-            joinedload(models.Project.backers).options(
-                joinedload(models.BackerProjectOrder.backer)
+            joinedload(models.Project.users).options(
+                joinedload(models.Transaction.backer)
             )
         )
         .filter(models.Project.id == project_id)

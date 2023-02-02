@@ -3,25 +3,26 @@ from enum import Enum
 from sqlalchemy import Column, ForeignKey, Integer, Float, Enum, DateTime
 from sqlalchemy.orm import relationship
 from app.db.base_class import Base
-from app.schemas.backer_status import BackerStatus
+from app.schemas.transaction_status import TransactionStatus, TransactionType
 from app.schemas.currency import Currency
 
 
-class BackerProjectOrder(Base):
-    __tablename__ = "backers_projects_orders"
+class Transaction(Base):
+    __tablename__ = "transactions"
     id = Column(
         Integer, primary_key=True, index=True, autoincrement=True, nullable=False
     )
-    backer_id = Column(ForeignKey("users.id"), index=True, primary_key=True)
+    user_id = Column(ForeignKey("users.id"), index=True, primary_key=True)
     project_id = Column(ForeignKey("projects.id"), index=True, primary_key=True)
     quantity = Column(Integer, nullable=False)
     amount = Column(Float, nullable=False)
     date_ordered = Column(DateTime(timezone=True), default=datetime.utcnow)
-    status = Column(Enum(BackerStatus, create_type=False))
+    status = Column(Enum(TransactionStatus, create_type=False))
     currency = Column(Enum(Currency))
+    type = Column(Enum(TransactionType, create_type=False))
 
-    backer = relationship("User", back_populates="projects_backed")
-    project = relationship("Project", back_populates="backers")
+    user = relationship("User", back_populates="projects_backed")
+    project = relationship("Project", back_populates="users")
 
     def __getitem__(self, key):
         return self.__dict__[key]

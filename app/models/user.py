@@ -19,7 +19,7 @@ class User(Base):
     is_admin = Column(Boolean, default=False)
     joined_date = Column(DateTime, default=datetime.utcnow)
     projects_owned = relationship("Project", back_populates="owner")
-    projects_backed = relationship("BackerProjectOrder", back_populates="backer")
+    projects_backed = relationship("Transaction", back_populates="user")
 
     def __getitem__(self, key):
         return self.__dict__[key]
