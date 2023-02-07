@@ -39,6 +39,7 @@ def update_status() -> None:
             if project.percentage_raised < 100:
                 project.status = ProjectStatus.FAIL
                 send_email_when_project_fails()
+                refund_all_backers(project)
 
             else:
                 project.status = ProjectStatus.SUCCESS

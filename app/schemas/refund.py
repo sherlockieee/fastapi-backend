@@ -1,35 +1,35 @@
 from datetime import datetime
 from pydantic import BaseModel
-from typing import Optional
 
 from app.schemas.currency import Currency
 from app.schemas.transaction_status import TransactionStatus
 
 
-class TransactionBase(BaseModel):
+class RefundBase(BaseModel):
     quantity: int
     amount: float
     currency: Currency
+    transaction_id: int
 
 
-class TransactionIn(TransactionBase):
-    project_id: int
-
-
-class TransactionOut(TransactionBase):
+class RefundOut(RefundBase):
     id: int
-    date_ordered: datetime
+    date_refunded: datetime
     user: "UserInProject"
     project: "ProjectInBacker"
     status: TransactionStatus
-    refund: Optional["RefundInTransaction"]
 
     class Config:
         orm_mode = True
 
 
+class RefundInTransaction(RefundBase):
+    id: int
+    date_refunded: datetime
+    status: TransactionStatus
+
+
 from app.schemas.user import UserInProject
 from app.schemas.project import ProjectInBacker
-from app.schemas.refund import RefundInTransaction
 
-TransactionOut.update_forward_refs()
+RefundOut.update_forward_refs()

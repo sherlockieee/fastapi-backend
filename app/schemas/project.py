@@ -13,7 +13,7 @@ class ProjectBase(BaseModel):
     funding_needed: float
     currency: Currency
     total_raised: float = 0
-    total_backers: int = 0
+    total_users: int = 0
     description: Optional[str] = None
     end_date: datetime
     total_credits: Optional[int] = 0
@@ -31,7 +31,7 @@ class ProjectInTag(ProjectBase):
     uuid: UUID
     created: datetime
     owner: Optional["UserInProject"] = None
-    backers: Optional[List["UserInProjectNested"]] = None
+    users: Optional[List["UserInProjectNested"]] = None
     remaining_credits: int
     remaining_funding: int
     percentage_raised: int
@@ -46,7 +46,7 @@ class ProjectInOwner(ProjectBase):
     uuid: UUID
     created: datetime
     tags: List["TagInProject"]
-    backers: Optional[List["UserInProjectNested"]] = None
+    users: Optional[List["UserInProjectNested"]] = None
 
     class Config:
         orm_mode = True
@@ -75,7 +75,7 @@ class BackerProjectGetter(GetterDict):
             "funding_needed",
             "currency",
             "total_raised",
-            "total_backers",
+            "total_users",
             "description",
             "end_date",
             "total_credits",
@@ -99,7 +99,7 @@ class Project(ProjectIn):
     uuid: UUID
     created: datetime
     owner: Optional["UserInProject"] = None
-    backers: Optional[List["UserInProjectNested"]] = None
+    users: Optional[List["UserInProjectNested"]] = None
     remaining_credits: int
     remaining_funding: int
     percentage_raised: int

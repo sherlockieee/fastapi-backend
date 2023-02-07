@@ -8,7 +8,7 @@ import app.models as models
 from app.api.deps import get_current_active_user, get_db
 from app.models.transactions import Transaction
 import app.schemas.transaction as schema
-from app.schemas.transaction_status import TransactionStatus
+from app.schemas.transaction_status import TransactionStatus, TransactionType
 from app.schemas.project_status import ProjectStatus
 from app.utils.emails import (
     send_email_when_funding_reaches,
@@ -85,7 +85,10 @@ async def create_transaction(
         )
 
     new_transaction = models.Transaction(
-        **transaction_dict, backer_id=current_user.id, status=TransactionStatus.SUCCESS
+        **transaction_dict,
+        user_id=current_user.id,
+        status=TransactionStatus.SUCCESS,
+        type=TransactionType.CROWDFUND
     )
     db.add(new_transaction)
     project.credits_sold += transaction_dict["quantity"]
