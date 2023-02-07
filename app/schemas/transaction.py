@@ -2,13 +2,14 @@ from datetime import datetime
 from pydantic import BaseModel
 
 from app.schemas.currency import Currency
-from app.schemas.transaction_status import TransactionStatus
+from app.schemas.transaction_status import TransactionStatus, TransactionType
 
 
 class TransactionBase(BaseModel):
     quantity: int
     amount: float
     currency: Currency
+    type: TransactionType
 
 
 class TransactionIn(TransactionBase):
@@ -18,7 +19,7 @@ class TransactionIn(TransactionBase):
 class TransactionOut(TransactionBase):
     id: int
     date_ordered: datetime
-    backer: "UserInProject"
+    user: "UserInProject"
     project: "ProjectInBacker"
     status: TransactionStatus
 

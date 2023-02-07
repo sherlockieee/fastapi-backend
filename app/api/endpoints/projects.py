@@ -30,7 +30,7 @@ def update_status() -> None:
             .filter(models.Project.days_remaining <= 0)
             .options(
                 joinedload(models.Project.users).options(
-                    joinedload(models.Transaction.backer)
+                    joinedload(models.Transaction.user)
                 )
             )
             .all()
@@ -83,7 +83,7 @@ def get_all_projects_backed_by_current_user(
         .join(models.User)
         .options(
             joinedload(models.Project.users).options(
-                joinedload(models.Transaction.backer)
+                joinedload(models.Transaction.user)
             )
         )
         .filter(models.Project.users.any(models.User.id == current_user.id))
@@ -114,7 +114,7 @@ def get_one_project(project_id: int, db: Session = Depends(get_db)):
         db.query(models.Project)
         .options(
             joinedload(models.Project.users).options(
-                joinedload(models.Transaction.backer)
+                joinedload(models.Transaction.user)
             )
         )
         .filter(models.Project.id == project_id)

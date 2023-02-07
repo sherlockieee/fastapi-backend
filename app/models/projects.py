@@ -124,12 +124,12 @@ class Project(Base):
 
     @hybrid_property
     def total_backers(self) -> int:
-        return len(self.backers)
+        return len(self.users)
 
     @total_backers.expression
     def total_backers(cls):
         return (
-            sa.select([sa.func.count(Transaction.backer)])
+            sa.select([sa.func.count(Transaction.user)])
             .where(Transaction.project_id == cls.id)
             .label("total_backers")
         )

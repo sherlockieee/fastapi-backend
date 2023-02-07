@@ -24,7 +24,7 @@ def get_transactions(
 ):
     transactions = (
         db.query(Transaction)
-        .options(joinedload(Transaction.backer))
+        .options(joinedload(Transaction.user))
         .options(joinedload(Transaction.project))
         .all()
     )
@@ -41,8 +41,8 @@ def get_transactions_for_one_project(
     transactions = (
         db.query(Transaction)
         .join(Transaction.project)
-        .join(Transaction.backer)
-        .options(contains_eager(Transaction.backer))
+        .join(Transaction.user)
+        .options(contains_eager(Transaction.user))
         .options(contains_eager(Transaction.project))
         .filter(models.Project.id == project_id)
         .filter(models.User.id == current_user.id)
@@ -66,8 +66,8 @@ async def create_transaction(
     project = (
         db.query(models.Project)
         .options(
-            joinedload(models.Project.backers).options(
-                joinedload(models.Transaction.backer)
+            joinedload(models.Project.users).options(
+                joinedload(models.Transaction.user)
             )
         )
         .filter(models.Project.id == transaction.project_id)
@@ -110,7 +110,7 @@ async def create_transaction(
 
     transaction = (
         db.query(Transaction)
-        .options(joinedload(Transaction.backer))
+        .options(joinedload(Transaction.user))
         .options(joinedload(Transaction.project))
         .where(Transaction.id == new_transaction.id)
         .one()
