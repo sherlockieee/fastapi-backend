@@ -26,4 +26,4 @@ class Refund(Base):
     transaction = relationship("Transaction", back_populates="refund")
 
     def __getitem__(self, key):
-        return self.__dict__[key]
+        return self.__dict__[key] if key in self.__dict__ else None

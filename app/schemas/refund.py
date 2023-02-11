@@ -18,6 +18,7 @@ class RefundOut(RefundBase):
     user: "UserInProject"
     project: "ProjectInBacker"
     status: TransactionStatus
+    transaction: "TransactionInRefund"
 
     class Config:
         orm_mode = True
@@ -28,8 +29,13 @@ class RefundInTransaction(RefundBase):
     date_refunded: datetime
     status: TransactionStatus
 
+    class Config:
+        orm_mode = True
+
 
 from app.schemas.user import UserInProject
 from app.schemas.project import ProjectInBacker
+from app.schemas.transaction import TransactionInRefund
 
 RefundOut.update_forward_refs()
+

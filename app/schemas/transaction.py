@@ -27,9 +27,19 @@ class TransactionOut(TransactionBase):
     class Config:
         orm_mode = True
 
+class TransactionInRefund(TransactionBase):
+    id: int
+    date_ordered: datetime
+    status: TransactionStatus
+
+    class Config:
+        orm_mode = True
+
 
 from app.schemas.user import UserInProject
 from app.schemas.project import ProjectInBacker
+
 from app.schemas.refund import RefundInTransaction
 
 TransactionOut.update_forward_refs()
+TransactionInRefund.update_forward_refs()

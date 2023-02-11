@@ -26,6 +26,7 @@ def get_transactions(
         db.query(Transaction)
         .options(joinedload(Transaction.user))
         .options(joinedload(Transaction.project))
+        # .join(Transaction.refund)
         .all()
     )
 
