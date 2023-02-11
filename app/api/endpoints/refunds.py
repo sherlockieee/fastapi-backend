@@ -1,17 +1,14 @@
-from typing import List
+from typing import List, Union
 from fastapi import APIRouter, Depends, status, HTTPException, BackgroundTasks
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, contains_eager
 
 
 import app.models as models
 from app.api.deps import get_current_active_user, get_db
 import app.schemas.refund as schema
 from app.schemas.transaction_status import TransactionStatus
-from app.utils.emails import (
-    send_email_when_funding_reaches,
-    send_email_when_transaction_succeeds,
-)
+
 
 router = APIRouter(prefix="/refunds", tags=["transactions"])
 
@@ -20,6 +17,45 @@ router = APIRouter(prefix="/refunds", tags=["transactions"])
 def get_refunds(db: Session = Depends(get_db)):
     all_refunds = db.query(models.Refund).all()
     return all_refunds
+
+@router.get("/project/{project_id}", response_model=List[schema.RefundOut])
+def get_refunds_for_one_project(
+    project_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_active_user),
+):
+    refunds = (
+        db.query(models.Refund)
+        .join(models.Refund.project)
+        .join(models.Refund.user)
+        .options(contains_eager(models.Refund.user))
+        .options(contains_eager(models.Refund.project))
+        .filter(models.Project.id == project_id)
+        .filter(models.User.id == current_user.id)
+        .all()
+    )
+
+    return refunds
+
+@router.get("/transaction/{transaction_id}", response_model=Union[schema.RefundOut, None])
+def get_refund_for_transaction(
+    transaction_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_active_user),
+):
+    refund = (
+        db.query(models.Refund)
+        .filter(models.Refund.transaction_id == transaction_id)
+        .first()
+    )
+
+    if not refund:
+        return 
+
+    if refund.user.id != current_user.id: 
+        raise HTTPException(status_code=401, detail="Not authorized")
+
+    return refund
 
 
 @router.post(
@@ -51,9 +87,6 @@ async def refund_project(
         .filter(models.Transaction.project_id == project_id)
         .all()
     )
-
-    print(all_crowdfund_transactions)
-
     all_refund_ids = []
 
     for transaction in all_crowdfund_transactions:
@@ -92,6 +125,7 @@ async def refund_project(
         try:
             db.add(refund)
             # send_email_when_refund_success(background_tasks, project, user_id)
+            print("refund successfully")
             db.commit()
             db.refresh(refund)
             all_refund_ids.append(refund.id)
