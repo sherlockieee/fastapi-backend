@@ -6,3 +6,4 @@ from app.models.tags import Tag  # noqa
 from app.models.transactions import Transaction
 from app.models.refunds import Refund
 from app.models.user import User
+from app.models.payouts import Payout

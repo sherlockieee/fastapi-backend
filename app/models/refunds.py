@@ -22,7 +22,7 @@ class Refund(Base):
     currency = Column(Enum(Currency, create_type=False))
 
     user = relationship("User", back_populates="projects_refunded")
-    project = relationship("Project", back_populates="refunders")
+    project = relationship("Project", back_populates="refunds")
     transaction = relationship("Transaction", back_populates="refund")
 
     def __getitem__(self, key):

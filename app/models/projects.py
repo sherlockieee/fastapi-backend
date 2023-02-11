@@ -43,14 +43,14 @@ class Project(Base):
     credits_sold = Column(Integer)
     tags = relationship("Tag", secondary="project_tags", back_populates="projects")
     owner_id = Column(Integer, ForeignKey("users.id"))
-    owner = relationship("User", back_populates="projects_owned")
-    users = relationship("Transaction", back_populates="project")
-    refunders = relationship("Refund", back_populates="project")
     status = Column(Enum(ProjectStatus))
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
-    def __repr__(self):
-        return f"{self.title}: {self.tags}"
+    owner = relationship("User", back_populates="projects_owned")
+    users = relationship("Transaction", back_populates="project")
+    refunds = relationship("Refund", back_populates="project")
+    payout = relationship("Payout", uselist=False, back_populates="project" )
+
 
     def __getitem__(self, key):
         return self.__dict__[key]
