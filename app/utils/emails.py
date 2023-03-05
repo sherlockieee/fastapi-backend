@@ -1,4 +1,5 @@
 from fastapi import BackgroundTasks
+from fastapi.encoders import jsonable_encoder
 
 from app.deps.email.email import Email
 from app.utils.backers import get_total_credits_bought
@@ -42,18 +43,20 @@ def send_email_when_funding_reaches(background_tasks: BackgroundTasks, project):
     )
 
 
-def send_email_when_project_fails(background_tasks: BackgroundTasks, project):
+def send_email_when_project_fails(project):
     project_backers = set(transaction.user for transaction in project.users)
-
+    print("hello")
     for project_backer in project_backers:
         credits_bought = get_total_credits_bought(project.users, project_backer)
-
-        Email(project_backer.preferred_name, [project_backer.email]).send_project_fails(
-            background_tasks, project.title, credits_bought, project.credits_sold
+        print(project_backers, credits_bought)
+        return Email(
+            project_backer.preferred_name, [project_backer.email]
+        ).send_project_fails(
+            credits_bought,
+            project.title,
         )
 
     Email(project.owner.preferred_name, [project.owner.email]).send_project_fails_owner(
-        background_tasks=background_tasks,
         project_name=project.title,
         no_of_backers=len(project_backers),
     )

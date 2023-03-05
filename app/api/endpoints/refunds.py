@@ -8,6 +8,7 @@ import app.models as models
 from app.api.deps import get_current_active_user, get_db
 import app.schemas.refund as schema
 from app.schemas.transaction_status import TransactionStatus
+from app.schemas.project_status import ProjectStatus
 
 
 router = APIRouter(prefix="/refunds", tags=["transactions"])
@@ -17,6 +18,7 @@ router = APIRouter(prefix="/refunds", tags=["transactions"])
 def get_refunds(db: Session = Depends(get_db)):
     all_refunds = db.query(models.Refund).all()
     return all_refunds
+
 
 @router.get("/project/{project_id}", response_model=List[schema.RefundOut])
 def get_refunds_for_one_project(
@@ -37,7 +39,10 @@ def get_refunds_for_one_project(
 
     return refunds
 
-@router.get("/transaction/{transaction_id}", response_model=Union[schema.RefundOut, None])
+
+@router.get(
+    "/transaction/{transaction_id}", response_model=Union[schema.RefundOut, None]
+)
 def get_refund_for_transaction(
     transaction_id: int,
     db: Session = Depends(get_db),
@@ -50,24 +55,25 @@ def get_refund_for_transaction(
     )
 
     if not refund:
-        return 
+        return
 
-    if refund.user.id != current_user.id: 
+    if refund.user.id != current_user.id:
         raise HTTPException(status_code=401, detail="Not authorized")
 
     return refund
 
 
 @router.post(
-    "/{project_id}",
+    "project/{project_id}",
     status_code=status.HTTP_201_CREATED,
     response_model=List[schema.RefundOut],
 )
-async def refund_project(
-    background_tasks: BackgroundTasks,
+def refund_project(
+    # background_tasks: BackgroundTasks,
     project_id: int,
     db: Session = Depends(get_db),
 ):
+    print("refunding")
 
     project = (
         db.query(models.Project)
@@ -81,6 +87,12 @@ async def refund_project(
     )
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
+
+    elif project.status != ProjectStatus.FAIL:
+        raise HTTPException(
+            status_code=404,
+            detail="Project doesn't have fail status so refund cannot happen",
+        )
 
     all_crowdfund_transactions: List[models.Transaction] = (
         db.query(models.Transaction)

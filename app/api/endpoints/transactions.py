@@ -53,7 +53,6 @@ def get_transactions_for_one_project(
     return transactions
 
 
-
 @router.post(
     "/", status_code=status.HTTP_201_CREATED, response_model=schema.TransactionOut
 )
@@ -90,7 +89,6 @@ async def create_transaction(
         **transaction_dict,
         user_id=current_user.id,
         status=TransactionStatus.SUCCESS,
-        type=TransactionType.CROWDFUND
     )
     db.add(new_transaction)
     project.credits_sold += transaction_dict["quantity"]

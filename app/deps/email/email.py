@@ -1,6 +1,7 @@
 from typing import List
 from fastapi import BackgroundTasks
 from starlette.responses import JSONResponse
+from starlette.background import BackgroundTask
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 from pydantic import EmailStr, BaseModel
 from jinja2 import Environment, select_autoescape, PackageLoader
@@ -55,6 +56,8 @@ class Email:
     def send_email_background(
         self, background_tasks: BackgroundTasks, subject: str, template: str, **kwargs
     ):
+        if not background_tasks:
+            background_tasks = BackgroundTasks()
 
         conf, message = self.generate_mail(subject, template, **kwargs)
         fm = FastMail(conf)
@@ -107,11 +110,29 @@ class Email:
             no_of_backers=no_of_backers,
         )
 
-    def send_project_fails(self, background_tasks, no_of_credits_bought, project_name):
+    def send_project_fails(self, no_of_credits_bought, project_name):
+        print("sending")
+
+        # conf, message = self.generate_mail(
+        #     subject=f"Refunding from your crowdfunding project {project_name}",
+        #     template="project_fails",
+        #     project_name=project_name,
+        #     no_of_credits_bought=no_of_credits_bought,
+        # )
+        # fm = FastMail(conf)
+
+        # background_tasks = BackgroundTasks()
+        # background_tasks.add_task(fm.send_message, message)
+        # return JSONResponse(
+        #     status_code=200,
+        #     content={"message": "email has been sent"},
+        # )
+        # background_tasks.add_task()
+
         self.send_email_background(
-            background_tasks,
-            f"Refunding from your crowdfunding project {project_name}",
-            "project_fails",
+            background_tasks=None,
+            subject=f"Refunding from your crowdfunding project {project_name}",
+            template="project_fails",
             project_name=project_name,
             no_of_credits_bought=no_of_credits_bought,
         )

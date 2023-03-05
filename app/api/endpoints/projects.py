@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, Depends, status, HTTPException, Query
+from fastapi import APIRouter, Depends, status, HTTPException, Query, BackgroundTasks
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import insert
@@ -16,6 +16,7 @@ from app.utils.emails import (
     send_email_when_funding_reaches,
     send_email_when_project_fails,
 )
+from app.api.endpoints.refunds import refund_project
 
 router = APIRouter(prefix="/projects", tags=["projects"])
 
@@ -36,10 +37,12 @@ def update_status() -> None:
             .all()
         )
         for project in finished_projects:
+            print(project.id, project.percentage_raised)
             if project.percentage_raised < 100:
                 project.status = ProjectStatus.FAIL
-                send_email_when_project_fails()
-                refund_all_backers(project)
+                print(project.status)
+                # print(send_email_when_project_fails(project=project))
+                refund_project(project_id=project.id, db=db)
 
             else:
                 project.status = ProjectStatus.SUCCESS

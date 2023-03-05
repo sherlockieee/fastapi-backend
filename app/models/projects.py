@@ -49,8 +49,7 @@ class Project(Base):
     owner = relationship("User", back_populates="projects_owned")
     users = relationship("Transaction", back_populates="project")
     refunds = relationship("Refund", back_populates="project")
-    payout = relationship("Payout", uselist=False, back_populates="project" )
-
+    payout = relationship("Payout", back_populates="project")
 
     def __getitem__(self, key):
         return self.__dict__[key]
@@ -124,13 +123,13 @@ class Project(Base):
         ).label("days_remaining")
 
     @hybrid_property
-    def total_backers(self) -> int:
+    def total_users(self) -> int:
         return len(self.users)
 
-    @total_backers.expression
-    def total_backers(cls):
+    @total_users.expression
+    def total_users(cls):
         return (
             sa.select([sa.func.count(Transaction.user)])
             .where(Transaction.project_id == cls.id)
-            .label("total_backers")
+            .label("total_users")
         )
