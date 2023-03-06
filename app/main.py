@@ -14,6 +14,7 @@ origins = [
     "https://x-kickstarter-for-climate.vercel.app/",
     "http://localhost",
     "http://localhost:3000",
+    "https://checkout.stripe.com",
 ]
 
 app.add_middleware(

@@ -27,6 +27,7 @@ class TransactionOut(TransactionBase):
     class Config:
         orm_mode = True
 
+
 class TransactionInRefund(TransactionBase):
     id: int
     date_ordered: datetime
