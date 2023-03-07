@@ -43,7 +43,7 @@ def update_status(background_tasks, db):
 
         else:
             project.status = ProjectStatus.SUCCESS
-            send_email_when_funding_reaches()
+            send_email_when_funding_reaches(background_tasks, project)
         db.commit()
 
 
@@ -75,7 +75,7 @@ async def get_projects(
     return all_projects
 
 
-@router.get("/me/backer", response_model=List[schema.ProjectInBackerSummary])
+@router.get("/me/backer", response_model=List[schema.ProjectOut])
 def get_all_projects_backed_by_current_user(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_active_user),

@@ -115,11 +115,7 @@ class Project(ProjectIn):
 
 
 class ProjectOut(Project):
-    pass
-
-
-class ProjectInBackerSummary(ProjectInBacker):
-    total_credits_bought: int
+    total_credits_bought: Optional[int]
 
 
 from app.schemas.tag import TagInProject, TagInProjectIn
@@ -132,4 +128,3 @@ ProjectInBackerNested.update_forward_refs()
 ProjectIn.update_forward_refs()
 Project.update_forward_refs()
 ProjectOut.update_forward_refs()
-ProjectInBackerSummary.update_forward_refs()
