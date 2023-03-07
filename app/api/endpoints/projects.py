@@ -72,6 +72,8 @@ async def get_projects(
                 pass
             query = query.order_by(getattr(models.Project, col))
     all_projects = query.offset(offset).limit(limit).all()
+    for proj in all_projects:
+        proj.total_users = len(set([x.user_id for x in list(proj.users)]))
     return all_projects
 
 
@@ -95,6 +97,7 @@ def get_all_projects_backed_by_current_user(
 
     for proj in all_projects:
         proj.total_credits_bought = get_total_credits_bought(proj.users, current_user)
+        proj.total_users = len(set([x.user_id for x in list(proj.users)]))
     return all_projects
 
 
@@ -108,6 +111,9 @@ def get_all_projects_owned_by_current_user(
         .filter(models.Project.owner_id == current_user.id)
         .all()
     )
+
+    for proj in all_projects:
+        proj.total_users = len(set([x.user_id for x in list(proj.users)]))
     return all_projects
 
 
@@ -125,6 +131,8 @@ def get_one_project(project_id: int, db: Session = Depends(get_db)):
     )
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
+
+    project.total_users = len(set([x.user_id for x in list(project.users)]))
     return project
 
 

@@ -9,15 +9,20 @@ from sqlalchemy import (
     Text,
     Enum,
     ForeignKey,
+    select,
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from datetime import datetime
+from sqlalchemy.ext.hybrid import hybrid_property
+
+
 from app.db.base_class import Base
 from app.schemas.currency import Currency
 from app.schemas.project_status import ProjectStatus
-from sqlalchemy.ext.hybrid import hybrid_property
 from app.models.transactions import Transaction
+from app.models.user import User
+from app.models.refunds import Refund
 
 
 class Project(Base):
@@ -125,14 +130,24 @@ class Project(Base):
             else_=0,
         ).label("days_remaining")
 
-    @hybrid_property
-    def total_users(self) -> int:
-        return len(self.users)
 
-    @total_users.expression
-    def total_users(cls):
-        return (
-            sa.select([sa.func.count(Transaction.user)])
-            .where(Transaction.project_id == cls.id)
-            .label("total_users")
-        )
+#    @hybrid_property
+# def total_users(self) -> int:
+#     return len(set(self.users))
+
+# @total_users.expression
+# def total_users(cls):
+#     # return (
+#     #     sa.select(Transaction.user_id)
+#     #     .group_by(Transaction.user_id)
+#     #     .join(Transaction, cls.id == Transaction.project_id)
+#     #     .where(Transaction.project_id == cls.id)
+#     #     .count()
+#     #     .label("total_users")
+#     # )
+#     return sa.select(
+#         [sa.func.count(Transaction.user_id).where(Transaction.project_id == cls.id)]
+#     ).label("total_users")
+
+
+# print(select(Project.total_users))

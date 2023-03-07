@@ -78,7 +78,7 @@ class BackerProjectGetter(GetterDict):
             "funding_needed",
             "currency",
             "total_raised",
-            "total_users",
+            # "total_users",
             "description",
             "end_date",
             "total_credits",
