@@ -69,11 +69,10 @@ def get_refund_for_transaction(
     response_model=List[schema.RefundOut],
 )
 def refund_project(
-    # background_tasks: BackgroundTasks,
+    background_tasks: BackgroundTasks,
     project_id: int,
     db: Session = Depends(get_db),
 ):
-    print("refunding")
 
     project = (
         db.query(models.Project)
@@ -106,7 +105,6 @@ def refund_project(
             transaction.refund is not None
             and transaction.refund.status == TransactionStatus.SUCCESS
         ):
-            print("Already refunded")
             continue
         elif (
             transaction.refund is not None
@@ -115,7 +113,6 @@ def refund_project(
             transaction.refund.status = TransactionStatus.SUCCESS
             db.commit()
 
-            print("Successfully update")
             all_refund_ids.append(transaction.refund.id)
             continue
 
@@ -137,7 +134,6 @@ def refund_project(
         try:
             db.add(refund)
             # send_email_when_refund_success(background_tasks, project, user_id)
-            print("refund successfully")
             db.commit()
             db.refresh(refund)
             all_refund_ids.append(refund.id)

@@ -20,6 +20,9 @@ class ProjectBase(BaseModel):
     cost_per_credit: Optional[float] = 0
     credits_sold: Optional[int] = 0
     status: Optional[ProjectStatus] = ProjectStatus.IN_FUNDING
+    image_url: Optional[
+        str
+    ] = "https://arbordayblog.org/wp-content/uploads/2016/06/tree.jpg"
 
 
 class ProjectIn(ProjectBase):
@@ -82,6 +85,7 @@ class BackerProjectGetter(GetterDict):
             "cost_per_credit",
             "credits_sold",
             "status",
+            "image_url",
         }:
             return getattr(self._obj.project, key)
         else:

@@ -43,20 +43,17 @@ def send_email_when_funding_reaches(background_tasks: BackgroundTasks, project):
     )
 
 
-def send_email_when_project_fails(project):
+def send_email_when_project_fails(background_tasks: BackgroundTasks, project):
     project_backers = set(transaction.user for transaction in project.users)
-    print("hello")
     for project_backer in project_backers:
         credits_bought = get_total_credits_bought(project.users, project_backer)
-        print(project_backers, credits_bought)
-        return Email(
-            project_backer.preferred_name, [project_backer.email]
-        ).send_project_fails(
+        Email(project_backer.preferred_name, [project_backer.email]).send_project_fails(
+            background_tasks,
             credits_bought,
             project.title,
         )
 
     Email(project.owner.preferred_name, [project.owner.email]).send_project_fails_owner(
+        background_tasks,
         project_name=project.title,
-        no_of_backers=len(project_backers),
     )

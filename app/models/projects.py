@@ -45,6 +45,9 @@ class Project(Base):
     owner_id = Column(Integer, ForeignKey("users.id"))
     status = Column(Enum(ProjectStatus))
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+    image_url = Column(
+        String, default="https://arbordayblog.org/wp-content/uploads/2016/06/tree.jpg"
+    )
 
     owner = relationship("User", back_populates="projects_owned")
     users = relationship("Transaction", back_populates="project")

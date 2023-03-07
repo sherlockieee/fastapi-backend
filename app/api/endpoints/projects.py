@@ -3,9 +3,7 @@ from fastapi import APIRouter, Depends, status, HTTPException, Query, Background
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import insert
-from fastapi_utils.tasks import repeat_every
 
-from app.db.session import SessionLocal
 import app.models as models
 from app.api.deps import get_current_active_user, get_db
 import app.schemas.project as schema
@@ -21,43 +19,44 @@ from app.api.endpoints.refunds import refund_project
 router = APIRouter(prefix="/projects", tags=["projects"])
 
 
-@router.on_event("startup")
-@repeat_every(seconds=60 * 60)  # every hour
-def update_status() -> None:
-    with SessionLocal() as db:
-        finished_projects: List[schema.Project] = (
-            db.query(models.Project)
-            .filter(models.Project.status.in_([ProjectStatus.IN_FUNDING]))
-            .filter(models.Project.days_remaining <= 0)
-            .options(
-                joinedload(models.Project.users).options(
-                    joinedload(models.Transaction.user)
-                )
+def update_status(background_tasks, db):
+    finished_projects: List[schema.Project] = (
+        db.query(models.Project)
+        .filter(models.Project.status.in_([ProjectStatus.IN_FUNDING]))
+        .filter(models.Project.days_remaining <= 0)
+        .options(
+            joinedload(models.Project.users).options(
+                joinedload(models.Transaction.user)
             )
-            .all()
         )
-        for project in finished_projects:
-            print(project.id, project.percentage_raised)
-            if project.percentage_raised < 100:
-                project.status = ProjectStatus.FAIL
-                print(project.status)
-                # print(send_email_when_project_fails(project=project))
-                refund_project(project_id=project.id, db=db)
+        .all()
+    )
+    for project in finished_projects:
+        print(project.id, project.percentage_raised)
+        if project.percentage_raised < 100:
+            project.status = ProjectStatus.FAIL
 
-            else:
-                project.status = ProjectStatus.SUCCESS
-                send_email_when_funding_reaches()
-            db.commit()
+            send_email_when_project_fails(
+                background_tasks=background_tasks, project=project
+            )
+            refund_project(background_tasks, project_id=project.id, db=db)
+
+        else:
+            project.status = ProjectStatus.SUCCESS
+            send_email_when_funding_reaches()
+        db.commit()
 
 
 @router.get("/", response_model=List[schema.ProjectOut])
-def get_projects(
+async def get_projects(
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     offset: int = 0,
     limit: int = 100,
     filtered_status: List[ProjectStatus] = Query(default=[ProjectStatus.IN_FUNDING]),
     order_by: List[str] = Query(default=None),
 ):
+    update_status(background_tasks, db)
     query = (
         db.query(models.Project)
         .filter(models.Project.status.in_(filtered_status))

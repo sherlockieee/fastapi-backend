@@ -1,9 +1,9 @@
 from datetime import datetime
 from enum import Enum
-from sqlalchemy import Column, ForeignKey, Integer, Float, Enum, DateTime
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy import Column, ForeignKey, Integer, Float, Enum, DateTime, String
+from sqlalchemy.orm import relationship
 from app.db.base_class import Base
-from app.schemas.transaction_status import TransactionStatus, TransactionType
+from app.schemas.transaction_status import TransactionStatus
 from app.schemas.currency import Currency
 
 
@@ -24,6 +24,7 @@ class Transaction(Base):
     date_ordered = Column(DateTime, default=datetime.utcnow)
     status = Column(Enum(TransactionStatus, create_type=False))
     currency = Column(Enum(Currency, create_type=False))
+    stripe_id = Column(String)
 
     user = relationship("User", back_populates="projects_backed")
     project = relationship("Project", back_populates="users")

@@ -16,7 +16,6 @@ import stripe
 
 
 import app.models as models
-from app.db.session import SessionLocal
 from app.api.deps import get_current_active_user, get_db
 from app.models.transactions import Transaction
 import app.schemas.transaction as schema
@@ -199,6 +198,7 @@ def fulfill_order(session, background_tasks: BackgroundTasks, db):
     quantity = int(session["metadata"]["quantity"])
     amount = int(session["amount_total"]) / 100
     currency = session["currency"].upper()
+    stripe_id = session["id"]
 
     project = db.query(models.Project).filter(models.Project.id == project_id).first()
     current_user = db.query(models.User).filter(models.User.id == user_id).first()
@@ -209,7 +209,8 @@ def fulfill_order(session, background_tasks: BackgroundTasks, db):
         amount=amount,
         currency=currency,
         user_id=user_id,
-        status=TransactionStatus.PENDING,
+        stripe_id=stripe_id,
+        status=TransactionStatus.SUCCESS,
     )
     db.add(new_transaction)
     project.credits_sold += quantity

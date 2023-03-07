@@ -110,27 +110,9 @@ class Email:
             no_of_backers=no_of_backers,
         )
 
-    def send_project_fails(self, no_of_credits_bought, project_name):
-        print("sending")
-
-        # conf, message = self.generate_mail(
-        #     subject=f"Refunding from your crowdfunding project {project_name}",
-        #     template="project_fails",
-        #     project_name=project_name,
-        #     no_of_credits_bought=no_of_credits_bought,
-        # )
-        # fm = FastMail(conf)
-
-        # background_tasks = BackgroundTasks()
-        # background_tasks.add_task(fm.send_message, message)
-        # return JSONResponse(
-        #     status_code=200,
-        #     content={"message": "email has been sent"},
-        # )
-        # background_tasks.add_task()
-
+    def send_project_fails(self, background_tasks, no_of_credits_bought, project_name):
         self.send_email_background(
-            background_tasks=None,
+            background_tasks,
             subject=f"Refunding from your crowdfunding project {project_name}",
             template="project_fails",
             project_name=project_name,
@@ -140,7 +122,7 @@ class Email:
     def send_project_fails_owner(self, background_tasks, project_name):
         self.send_email_background(
             background_tasks,
-            f"Your project {project_name} did not reach its crowdfunding goals",
-            "project_fails_owner",
+            subject=f"Your project {project_name} did not reach its crowdfunding goals",
+            template="project_fails_owner",
             project_name=project_name,
         )
