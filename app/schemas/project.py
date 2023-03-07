@@ -5,6 +5,7 @@ from typing import List, Optional, Any
 from uuid import UUID
 
 from app.schemas.currency import Currency
+from app.schemas.project_status import ProjectStatus
 
 
 class ProjectBase(BaseModel):
@@ -12,12 +13,16 @@ class ProjectBase(BaseModel):
     funding_needed: float
     currency: Currency
     total_raised: float = 0
-    total_backers: int = 0
+    total_users: int = 0
     description: Optional[str] = None
     end_date: datetime
     total_credits: Optional[int] = 0
     cost_per_credit: Optional[float] = 0
     credits_sold: Optional[int] = 0
+    status: Optional[ProjectStatus] = ProjectStatus.IN_FUNDING
+    image_url: Optional[
+        str
+    ] = "https://arbordayblog.org/wp-content/uploads/2016/06/tree.jpg"
 
 
 class ProjectIn(ProjectBase):
@@ -29,7 +34,11 @@ class ProjectInTag(ProjectBase):
     uuid: UUID
     created: datetime
     owner: Optional["UserInProject"] = None
-    backers: Optional[List["UserInProjectNested"]] = None
+    users: Optional[List["UserInProjectNested"]] = None
+    remaining_credits: int
+    remaining_funding: int
+    percentage_raised: int
+    days_remaining: int
 
     class Config:
         orm_mode = True
@@ -40,7 +49,7 @@ class ProjectInOwner(ProjectBase):
     uuid: UUID
     created: datetime
     tags: List["TagInProject"]
-    backers: Optional[List["UserInProjectNested"]] = None
+    users: Optional[List["UserInProjectNested"]] = None
 
     class Config:
         orm_mode = True
@@ -69,12 +78,14 @@ class BackerProjectGetter(GetterDict):
             "funding_needed",
             "currency",
             "total_raised",
-            "total_backers",
+            # "total_users",
             "description",
             "end_date",
             "total_credits",
             "cost_per_credit",
             "credits_sold",
+            "status",
+            "image_url",
         }:
             return getattr(self._obj.project, key)
         else:
@@ -92,7 +103,11 @@ class Project(ProjectIn):
     uuid: UUID
     created: datetime
     owner: Optional["UserInProject"] = None
-    backers: Optional[List["UserInProjectNested"]] = None
+    users: Optional[List["UserInProjectNested"]] = None
+    remaining_credits: int
+    remaining_funding: int
+    percentage_raised: int
+    days_remaining: int
 
     class Config:
         use_enum_values = True
@@ -100,7 +115,7 @@ class Project(ProjectIn):
 
 
 class ProjectOut(Project):
-    pass
+    total_credits_bought: Optional[int]
 
 
 from app.schemas.tag import TagInProject, TagInProjectIn

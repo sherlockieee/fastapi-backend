@@ -1,0 +1,18 @@
+{% extends 'base.html' %} {% block content %}
+
+<p>Hi {{name}},</p>
+<p>
+  The project that you supported, {{project_name}} has passed it funding time
+  but did not raise enough money.
+</p>
+<p>
+  As of our policy, we will return all of your money that you have spent on
+  {{no_of_credits_bought}} credits in this project. Keep a lookout for another
+  email coming soon once we have processed your payment successfully.
+</p>
+<p>
+  In the meantime, why not look for another project that needs your funding?
+</p>
+<p>Thank you for supporting!</p>
+
+{% endblock %}

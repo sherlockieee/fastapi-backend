@@ -23,6 +23,9 @@ class Settings(BaseSettings):
     EMAIL_PASSWORD: str
     EMAIL_FROM: EmailStr
 
+    STRIPE_API_KEY: str
+    STRIPE_WEBHOOK_ENDPOINT_SECRET: str
+
     class Config:
         case_sensitive = True
         env_file = "./.env"

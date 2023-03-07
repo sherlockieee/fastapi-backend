@@ -1,12 +1,11 @@
 from typing import List
 from fastapi import BackgroundTasks
 from starlette.responses import JSONResponse
+from starlette.background import BackgroundTask
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 from pydantic import EmailStr, BaseModel
 from jinja2 import Environment, select_autoescape, PackageLoader
-import sys
 
-from app import models
 from app.config import settings
 
 
@@ -23,7 +22,7 @@ class EmailSchema(BaseModel):
 class Email:
     def __init__(self, name: str, email: List[EmailStr]):
         self.name = name
-        self.sender = "Admin @ X | Kickstarter for Climate"
+        self.sender = "Admin @ CreX"
         self.email = email
 
     def generate_mail(self, subject: str, template: str, **kwargs):
@@ -52,9 +51,13 @@ class Email:
         fm = FastMail(conf)
         await fm.send_message(message)
 
+        return JSONResponse(status_code=200, content={"message": "email has been sent"})
+
     def send_email_background(
         self, background_tasks: BackgroundTasks, subject: str, template: str, **kwargs
     ):
+        if not background_tasks:
+            background_tasks = BackgroundTasks()
 
         conf, message = self.generate_mail(subject, template, **kwargs)
         fm = FastMail(conf)
@@ -79,4 +82,47 @@ class Email:
             person_supporting=person_supporting,
             no_of_credits=no_of_credits,
             amount=amount,
+        )
+
+    def send_project_successfully_funded(
+        self, background_tasks, project_name, no_of_credits_bought, no_of_credits_sold
+    ):
+        self.send_email_background(
+            background_tasks,
+            f"The project you support, {project_name}, is fully funded!",
+            "project_fully_funded",
+            project_name=project_name,
+            no_of_credits_bought=no_of_credits_bought,
+            no_of_credits_sold=no_of_credits_sold,
+        )
+
+    def send_project_successfully_funded_for_owner(
+        self,
+        background_tasks,
+        project_name,
+        no_of_backers,
+    ):
+        self.send_email_background(
+            background_tasks,
+            f"Your project {project_name} is fully funded!",
+            "project_fully_funded_owner",
+            project_name=project_name,
+            no_of_backers=no_of_backers,
+        )
+
+    def send_project_fails(self, background_tasks, no_of_credits_bought, project_name):
+        self.send_email_background(
+            background_tasks,
+            subject=f"Refunding from your crowdfunding project {project_name}",
+            template="project_fails",
+            project_name=project_name,
+            no_of_credits_bought=no_of_credits_bought,
+        )
+
+    def send_project_fails_owner(self, background_tasks, project_name):
+        self.send_email_background(
+            background_tasks,
+            subject=f"Your project {project_name} did not reach its crowdfunding goals",
+            template="project_fails_owner",
+            project_name=project_name,
         )
