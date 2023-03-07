@@ -37,7 +37,7 @@ class ProjectBackerGetter(GetterDict):
             "is_admin",
             "is_active",
         }:
-            return getattr(self._obj.backer, key)
+            return getattr(self._obj.user, key)
         else:
             return super(ProjectBackerGetter, self).get(key, default)
 

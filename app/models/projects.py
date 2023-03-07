@@ -9,17 +9,20 @@ from sqlalchemy import (
     Text,
     Enum,
     ForeignKey,
-    Date,
-    Interval,
+    select,
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from datetime import datetime
+from sqlalchemy.ext.hybrid import hybrid_property
+
+
 from app.db.base_class import Base
 from app.schemas.currency import Currency
 from app.schemas.project_status import ProjectStatus
-from sqlalchemy.ext.hybrid import hybrid_property
-from app.models.backers_projects_orders import BackerProjectOrder
+from app.models.transactions import Transaction
+from app.models.user import User
+from app.models.refunds import Refund
 
 
 class Project(Base):
@@ -38,20 +41,23 @@ class Project(Base):
     currency = Column(Enum(Currency))
     total_raised = Column(Float)
     description = Column(Text)
-    created = Column(DateTime(timezone=True), default=datetime.utcnow)
+    created = Column(DateTime, default=datetime.utcnow)
     end_date = Column(DateTime)
     total_credits = Column(Integer)
     cost_per_credit = Column(Float)
     credits_sold = Column(Integer)
     tags = relationship("Tag", secondary="project_tags", back_populates="projects")
     owner_id = Column(Integer, ForeignKey("users.id"))
-    owner = relationship("User", back_populates="projects_owned")
-    backers = relationship("BackerProjectOrder", back_populates="project")
     status = Column(Enum(ProjectStatus))
-    # updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+    image_url = Column(
+        String, default="https://arbordayblog.org/wp-content/uploads/2016/06/tree.jpg"
+    )
 
-    def __repr__(self):
-        return f"{self.title}: {self.tags}"
+    owner = relationship("User", back_populates="projects_owned")
+    users = relationship("Transaction", back_populates="project")
+    refunds = relationship("Refund", back_populates="project")
+    payout = relationship("Payout", back_populates="project")
 
     def __getitem__(self, key):
         return self.__dict__[key]
@@ -124,14 +130,24 @@ class Project(Base):
             else_=0,
         ).label("days_remaining")
 
-    @hybrid_property
-    def total_backers(self) -> int:
-        return len(self.backers)
 
-    @total_backers.expression
-    def total_backers(cls):
-        return (
-            sa.select([sa.func.count(BackerProjectOrder.backer)])
-            .where(BackerProjectOrder.project_id == cls.id)
-            .label("total_backers")
-        )
+#    @hybrid_property
+# def total_users(self) -> int:
+#     return len(set(self.users))
+
+# @total_users.expression
+# def total_users(cls):
+#     # return (
+#     #     sa.select(Transaction.user_id)
+#     #     .group_by(Transaction.user_id)
+#     #     .join(Transaction, cls.id == Transaction.project_id)
+#     #     .where(Transaction.project_id == cls.id)
+#     #     .count()
+#     #     .label("total_users")
+#     # )
+#     return sa.select(
+#         [sa.func.count(Transaction.user_id).where(Transaction.project_id == cls.id)]
+#     ).label("total_users")
+
+
+# print(select(Project.total_users))
