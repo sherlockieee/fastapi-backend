@@ -1,9 +1,7 @@
-from app.config import settings
-from app.db.session import SessionLocal
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.config import settings
 
 app_configs = {}
 if settings.ENVIRONMENT not in settings.SHOW_DOCS_ENVIRONMENT:
@@ -16,6 +14,7 @@ origins = [
     "https://x-kickstarter-for-climate.vercel.app/",
     "http://localhost",
     "http://localhost:3000",
+    "https://checkout.stripe.com",
 ]
 
 app.add_middleware(

@@ -6,41 +6,28 @@ from app.schemas.currency import Currency
 from app.schemas.transaction_status import TransactionStatus
 
 
-class TransactionBase(BaseModel):
+class PayoutBase(BaseModel):
     quantity: int
     amount: float
     currency: Currency
 
 
-class TransactionIn(TransactionBase):
+class PayoutIn(PayoutBase):
     project_id: int
 
 
-class TransactionOut(TransactionBase):
+class PayoutOut(PayoutBase):
     id: int
-    date_ordered: datetime
+    created_at: datetime
     user: "UserInProject"
     project: "ProjectInBacker"
     status: TransactionStatus
-    refund: Optional["RefundInTransaction"]
 
     class Config:
         orm_mode = True
-
-
-class TransactionInRefund(TransactionBase):
-    id: int
-    date_ordered: datetime
-    status: TransactionStatus
-
-    class Config:
-        orm_mode = True
-
 
 from app.schemas.user import UserInProject
 from app.schemas.project import ProjectInBacker
 
-from app.schemas.refund import RefundInTransaction
 
-TransactionOut.update_forward_refs()
-TransactionInRefund.update_forward_refs()
+PayoutOut.update_forward_refs()
